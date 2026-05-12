@@ -314,10 +314,28 @@ body.menu-open {
 .placeholder-hero {
     position: relative;
     min-height: 620px;
-    align-items: flex-start;
-    justify-content: flex-end;
     padding: 38px 34px 30px;
     overflow: hidden;
+    border-radius: var(--radius-shell);
+    border: 1px solid rgba(79, 12, 40, 0.08);
+    background: #e8efe7;
+}
+
+.placeholder-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(241, 250, 238, 0.22);
+    pointer-events: none;
+}
+
+.hero-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
 }
 
 .hero-copy {
@@ -328,6 +346,7 @@ body.menu-open {
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    z-index: 1;
 }
 
 .hero-actions {
@@ -692,13 +711,6 @@ body.menu-open {
         gap: 18px;
         padding: 18px 16px 16px;
         min-height: 460px;
-    }
-
-    .placeholder-hero > span {
-        order: 2;
-        width: 100%;
-        max-width: 260px;
-        min-height: 86px;
     }
 
     .section-heading h2 {

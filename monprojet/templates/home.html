@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}ManageraHub | Modern Recruitment Platform{% endblock %}
 
@@ -38,8 +39,8 @@
             </header>
 
             <div class="hero-stage">
-                <div class="hero-visual placeholder-box placeholder-hero" aria-label="Hero image placeholder">
-                    <span>[Hero Image Placeholder]</span>
+                <div class="hero-visual placeholder-hero" aria-label="Hero image">
+                    <img src="{% static 'images/hero-office.jpg' %}" alt="Modern office workspace" class="hero-image">
                     <div class="hero-copy">
                         <h1 class="hero-title">ManageraHub</h1>
                         <p class="hero-subtitle">A modern recruitment platform connecting talent with opportunity.</p>
