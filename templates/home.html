@@ -125,7 +125,6 @@
             </div>
 
             <div class="service-grid">
-                <!-- CANDIDATE CARD -->
                 <article class="service-card service-card-light">
                     <div class="service-copy">
                         <span class="section-kicker">For Candidates</span>
@@ -133,7 +132,6 @@
                         <p>Create your profile, upload your CV, discover job offers, apply online, and follow your application status in one place.</p>
                         <a href="{% url 'candidate_register' %}" class="pill-button pill-button-dark">Start as Candidate</a>
                     </div>
-                    <!-- Image fills the card bottom, properly constrained -->
                     <div style="overflow:hidden; border-radius:16px; height:240px;">
                         <img
                             src="{% static 'images/service-candidate.png' %}"
@@ -143,7 +141,6 @@
                     </div>
                 </article>
 
-                <!-- COMPANY CARD -->
                 <article class="service-card service-card-dark">
                     <div class="service-copy">
                         <span class="section-kicker">For Companies</span>
@@ -151,7 +148,6 @@
                         <p>Publish job offers, receive applications, review candidate profiles, and manage the recruitment process easily.</p>
                         <a href="{% url 'company_register' %}" class="pill-button pill-button-light">Start as Company</a>
                     </div>
-                    <!-- Image fills the card bottom, properly constrained -->
                     <div style="overflow:hidden; border-radius:16px; height:240px;">
                         <img
                             src="{% static 'images/service-company.png' %}"
@@ -170,6 +166,7 @@
                     <h3>Access your ManageraHub space</h3>
                     <p>Log in to access your account, manage your applications, publish job offers, or supervise the platform.</p>
                     <a href="{% url 'signin' %}" class="pill-button pill-button-dark">Log in</a>
+                    <a href="/admin/login/" class="editorial-link">ADMIN LOGIN</a>
                 </div>
 
                 <div class="admin-visual admin-photo-wrap">

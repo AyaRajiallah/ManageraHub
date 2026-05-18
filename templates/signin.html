@@ -1,10 +1,10 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In | ManageraHub</title>
+    <title>{{ role_page_title|default:"Sign In" }} | ManageraHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700&family=Great+Vibes&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -44,8 +44,10 @@
         .role-label { margin-bottom: 6px; display: block; }
         .role-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .role-tab input[type="radio"] { display: none; }
-        .role-tab label { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 13px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.07); font-size: 0.78rem; font-weight: 600; color: rgba(255, 255, 255, 0.55); cursor: pointer; transition: all 0.18s; letter-spacing: 0.04em; }
-        .role-tab input[type="radio"]:checked + label { border-color: rgba(197, 210, 248, 0.5); background: rgba(197, 210, 248, 0.12); color: var(--periwinkle); box-shadow: 0 0 0 3px rgba(197, 210, 248, 0.08); }
+        .role-tab label,
+        .role-static-label { display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 13px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.07); font-size: 0.78rem; font-weight: 600; color: rgba(255, 255, 255, 0.55); cursor: pointer; transition: all 0.18s; letter-spacing: 0.04em; text-decoration: none; }
+        .role-tab input[type="radio"]:checked + label,
+        .role-static-label.active { border-color: rgba(197, 210, 248, 0.5); background: rgba(197, 210, 248, 0.12); color: var(--periwinkle); box-shadow: 0 0 0 3px rgba(197, 210, 248, 0.08); }
         .forgot { text-align: right; }
         .forgot a { font-size: 0.74rem; color: rgba(255, 255, 255, 0.45); text-decoration: none; }
         .btn-submit { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: var(--radius-pill); border: none; background: var(--plum); color: #fff; font-family: "Montserrat", sans-serif; font-size: 0.87rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; box-shadow: 0 12px 28px rgba(79, 12, 40, 0.45); }
@@ -98,18 +100,27 @@
             {% if error_message %}<div class="msg msg-error">{{ error_message }}</div>{% endif %}
             {% if success_message %}<div class="msg msg-success">{{ success_message }}</div>{% endif %}
             {% if reset_success %}<div class="msg msg-success">If this email exists, a reset link has been sent.</div>{% endif %}
-            <form method="post" action="{% url 'signin' %}" class="form">
+            <form method="post" action="{{ form_action|default:request.path }}" class="form">
                 {% csrf_token %}
                 <div>
                     <span class="role-label">I am a</span>
                     <div class="role-tabs">
                         <div class="role-tab candidate">
-                            <input type="radio" name="role" id="role-candidate" value="candidate" checked>
+                            {% if is_role_specific_page %}
+                            <input type="hidden" name="role" value="{{ active_role }}">
+                            <a href="{% url 'candidate_signin' %}" class="role-static-label{% if active_role == 'candidate' %} active{% endif %}">Candidate</a>
+                            {% else %}
+                            <input type="radio" name="role" id="role-candidate" value="candidate"{% if active_role != 'company' %} checked{% endif %}>
                             <label for="role-candidate">Candidate</label>
+                            {% endif %}
                         </div>
                         <div class="role-tab company">
-                            <input type="radio" name="role" id="role-company" value="company">
+                            {% if is_role_specific_page %}
+                            <a href="{% url 'company_signin' %}" class="role-static-label{% if active_role == 'company' %} active{% endif %}">Company</a>
+                            {% else %}
+                            <input type="radio" name="role" id="role-company" value="company"{% if active_role == 'company' %} checked{% endif %}>
                             <label for="role-company">Company</label>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -125,7 +136,7 @@
                     <a href="#" id="forgotLink">Forgot your password?</a>
                 </div>
                 <button type="submit" class="btn-submit">Sign In</button>
-                <div id="candidate-social" class="social-section{% if not social_auth_enabled %} hidden{% endif %}">
+                <div id="candidate-social" class="social-section{% if not social_auth_enabled or active_role == 'company' %} hidden{% endif %}">
                     {% if google_auth_enabled or github_auth_enabled %}
                     <div class="divider"><span>or continue with</span></div>
                     <div class="social-btns">
@@ -177,17 +188,28 @@
         const companyRadio = document.getElementById("role-company");
         const candidateSocial = document.getElementById("candidate-social");
         const socialAuthEnabled = {{ social_auth_enabled|yesno:"true,false" }};
+
         function syncSocialButtons() {
+            if (!candidateRadio || !companyRadio) {
+                return;
+            }
             const showSocial = socialAuthEnabled && candidateRadio.checked;
             candidateSocial.classList.toggle("hidden", !showSocial);
         }
+
         forgotLink.addEventListener("click", function (e) { e.preventDefault(); forgotModal.classList.add("open"); });
         function closeModal() { forgotModal.classList.remove("open"); }
         forgotModal.addEventListener("click", function (e) { if (e.target === e.currentTarget) { closeModal(); } });
         document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeModal(); } });
-        candidateRadio.addEventListener("change", syncSocialButtons);
-        companyRadio.addEventListener("change", syncSocialButtons);
+
+        if (candidateRadio) {
+            candidateRadio.addEventListener("change", syncSocialButtons);
+        }
+        if (companyRadio) {
+            companyRadio.addEventListener("change", syncSocialButtons);
+        }
         syncSocialButtons();
+
         resetForm.addEventListener("submit", function (e) {
             e.preventDefault();
             const email = document.getElementById("reset-email").value;

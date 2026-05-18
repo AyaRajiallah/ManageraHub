@@ -229,7 +229,7 @@
             <h1 class="reg-left-title">Find your next key talent</h1>
             <p class="reg-left-desc">Publish job offers, review candidate profiles, and manage your entire recruitment pipeline — from application to decision — in one place.</p>
             <span class="reg-left-tag">Trusted by growing companies</span>
-            <p class="reg-already">Already have an account? <a href="/signin">Sign in here</a></p>
+            <p class="reg-already">Already have an account? <a href="{% url 'signin' %}">Sign in here</a></p>
         </div>
     </div>
 
@@ -376,7 +376,7 @@
             </div>
 
             <button type="submit" class="reg-submit">Create Company Account</button>
-            <p class="signin-link">Already registered? <a href="/signin">Sign in</a></p>
+            <p class="signin-link">Already registered? <a href="{% url 'signin' %}">Sign in</a></p>
         </form>
     </div>
 

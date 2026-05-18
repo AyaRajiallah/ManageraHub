@@ -1,44 +1,50 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}{{ title }} | ManageraHub Admin{% endblock %}
+{% block title %}{{ title }} | Administration{% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'admin/css/admin-theme.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700&family=Great+Vibes:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'admin/css/admin-theme.css' %}?v=20260518-navbar-logout">
 {% endblock %}
 
 {% block branding %}
 <div class="mh-brand-shell">
-    <a href="{% url 'admin:index' %}" class="mh-brand-link">
-        <span class="mh-brand-mark">M</span>
-        <span class="mh-brand-text">
-            <strong>ManageraHub</strong>
-            <span>Admin Control</span>
-        </span>
+    <a href="{% url 'admin:index' %}" class="mh-brand-link mh-brand-link-script">
+        <span class="mh-brand-script">M</span>
+        <span class="mh-brand-script-text">Administration</span>
     </a>
+
+    <nav class="mh-admin-center-nav" aria-label="Admin navigation">
+        <a href="{% url 'admin:index' %}">Dashboard</a>
+        <a href="/admin/auth/user/">Users</a>
+        <a href="/admin/auth/group/">Roles</a>
+        <a href="/admin/admin/logentry/">Activity</a>
+        <a href="{% url 'admin_logout_redirect' %}" class="mh-admin-nav-logout-link">Log out</a>
+    </nav>
 </div>
 {% endblock %}
 
 {% block usertools %}
 {% if has_permission %}
 <div id="user-tools">
-    <div class="mh-user-welcome-wrap">
-        <span class="mh-user-welcome">Welcome, Admin</span>
-    </div>
     <div class="mh-user-nav">
-        <a href="{% url 'admin:index' %}">Dashboard</a>
+        <details class="mh-user-menu">
+            <summary class="mh-user-welcome">Welcome, Admin</summary>
+            <div class="mh-user-menu-panel">
+                {% if user.has_usable_password %}
+                <a href="{% url 'admin:password_change' %}" class="mh-user-menu-link">Change password</a>
+                {% endif %}
+                <form id="mh-logout-form" method="post" action="{% url 'admin_logout_redirect' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="mh-user-menu-link">Log out</button>
+                </form>
+            </div>
+        </details>
         <a href="/">View site</a>
-        {% if user.has_usable_password %}
-        <a href="{% url 'admin:password_change' %}">Change password</a>
-        {% endif %}
-        <form id="mh-logout-form" method="post" action="{% url 'admin:logout' %}">
-            {% csrf_token %}
-            <button type="submit">Log out</button>
-        </form>
     </div>
 </div>
 {% endif %}

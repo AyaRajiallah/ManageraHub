@@ -4,7 +4,6 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
-    #header,
     .breadcrumbs {
         display: none;
     }
@@ -12,72 +11,55 @@
     #content {
         padding: 18px 0 28px;
     }
+
+    .mh-home-pill-dark,
+    .mh-home-pill-dark:link,
+    .mh-home-pill-dark:visited {
+        color: #f1faee !important;
+    }
 </style>
 {% endblock %}
+
+{% block content_title %}{% endblock %}
 
 {% block content %}
 <div class="mh-home-admin-page">
     <div class="mh-home-admin-shell">
-        <header class="mh-home-admin-topbar">
-            <div class="mh-home-admin-links">
-                <a href="{% url 'admin:index' %}" class="active">Dashboard</a>
-                <a href="/admin/auth/user/">Users</a>
-                <a href="/admin/auth/group/">Roles</a>
-                <a href="/admin/admin/logentry/">Activity</a>
-            </div>
-
-            <a href="{% url 'admin:index' %}" class="mh-home-admin-brand" aria-label="ManageraHub admin">
-                <span class="mh-home-admin-script">M</span>
-            </a>
-
-            <div class="mh-home-admin-meta">
-                <span>ManageraHub Admin</span>
-                <a href="/">View Site</a>
-            </div>
-        </header>
-
         <section class="mh-home-admin-hero">
             <article class="mh-home-admin-card">
                 <div class="mh-home-admin-copy">
                     <span class="mh-home-kicker">Admin Dashboard</span>
-                    <h1>Keep the platform trusted and organized</h1>
-                    <p>Manage accounts, supervise platform activity, review verification, and keep ManageraHub clear, elegant, and secure.</p>
+                    <h1>Welcome to Administration</h1>
+                    <p>Manage your platform users, permissions, and monitor activity from this clean dashboard.</p>
                     <div class="mh-home-admin-actions">
                         <a href="/admin/auth/user/" class="mh-home-pill mh-home-pill-dark">Manage Users</a>
-                        <a href="/admin/admin/logentry/" class="mh-home-pill mh-home-pill-light">View Activity</a>
+                        <a href="/admin/auth/group/" class="mh-home-pill mh-home-pill-light">Roles & Permissions</a>
                     </div>
-                </div>
-
-                <div class="mh-home-admin-visual">
-                    <img src="{% static 'images/admin-section.jpg' %}" alt="Modern office workspace for administrators">
                 </div>
             </article>
         </section>
 
         <section class="mh-home-admin-stats">
-            {% for card in dashboard_cards %}
-            <a href="{{ card.link }}" class="mh-home-stat-card">
-                <span class="mh-home-kicker">{{ card.label }}</span>
-                <strong>{{ card.count }}</strong>
-                <p>{{ card.meta }}</p>
+            <a href="/admin/auth/user/" class="mh-home-stat-card">
+                <span class="mh-home-kicker">Total Users</span>
+                <strong>{{ user_count|default:0 }}</strong>
+                <p>All registered users</p>
             </a>
-            {% endfor %}
-        </section>
-
-        <section class="mh-home-admin-panels">
-            {% for panel in feature_panels %}
-            <article class="mh-home-feature-card{% if forloop.counter == 2 %} dark{% endif %}">
-                <span class="mh-home-kicker">{{ panel.eyebrow }}</span>
-                <h2>{{ panel.title }}</h2>
-                <p>{{ panel.description }}</p>
-                <ul>
-                    {% for bullet in panel.bullets %}
-                    <li>{{ bullet }}</li>
-                    {% endfor %}
-                </ul>
-                <a href="{{ panel.link }}" class="mh-home-inline-link">{{ panel.action }}</a>
-            </article>
-            {% endfor %}
+            <a href="/admin/auth/user/?is_staff=1" class="mh-home-stat-card">
+                <span class="mh-home-kicker">Admins</span>
+                <strong>{{ admin_count|default:0 }}</strong>
+                <p>Staff & superusers</p>
+            </a>
+            <a href="/admin/auth/user/?is_active=1" class="mh-home-stat-card">
+                <span class="mh-home-kicker">Active Users</span>
+                <strong>{{ active_count|default:0 }}</strong>
+                <p>Currently active</p>
+            </a>
+            <a href="/admin/admin/logentry/" class="mh-home-stat-card">
+                <span class="mh-home-kicker">Recent Activity</span>
+                <strong>{{ activity_count|default:0 }}</strong>
+                <p>Admin actions log</p>
+            </a>
         </section>
 
         <section class="mh-home-admin-table-card">
@@ -97,7 +79,7 @@
                             <th>Email</th>
                             <th>Joined</th>
                             <th>Role</th>
-                            <th>Status</th>
+                            <th>Staff Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,11 +89,11 @@
                             <td>{{ user.email|default:"Unspecified" }}</td>
                             <td>{{ user.date_joined|date:"Y-m-d" }}</td>
                             <td>{% if user.is_superuser %}Superuser{% elif user.is_staff %}Staff{% else %}Member{% endif %}</td>
-                            <td>
-                                {% if user.is_active %}
-                                <span class="mh-home-status active">Active</span>
+                            <td class="mh-home-status-icon-cell">
+                                {% if user.is_staff %}
+                                <img src="{% static 'admin/img/icon-yes.svg' %}" alt="Yes" class="mh-home-status-icon">
                                 {% else %}
-                                <span class="mh-home-status inactive">Inactive</span>
+                                <img src="{% static 'admin/img/icon-no.svg' %}" alt="No" class="mh-home-status-icon">
                                 {% endif %}
                             </td>
                         </tr>

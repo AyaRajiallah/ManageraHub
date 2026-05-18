@@ -1,7 +1,10 @@
-﻿from django.conf import settings
-from django.contrib.auth import authenticate, login
+from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import PasswordResetForm
 from django.shortcuts import redirect, render
+
+DEFAULT_CANDIDATE_DASHBOARD_URL = "/candidate/dashboard"
+DEFAULT_COMPANY_DASHBOARD_URL = "/company/dashboard"
 
 
 def home(request):
@@ -16,6 +19,11 @@ def admin_dashboard_view(request):
     if request.user.is_authenticated and request.user.is_staff:
         return redirect("/admin/")
     return redirect("/admin/login/")
+
+
+def admin_logout_view(request):
+    logout(request)
+    return redirect("/signin")
 
 
 def candidate_register_view(request):
@@ -74,29 +82,58 @@ def _signin_context(**extra):
     return context
 
 
-def signin_view(request):
-    error_message = None
+def _role_dashboard_url(role):
+    if role == "company":
+        return DEFAULT_COMPANY_DASHBOARD_URL
+    return DEFAULT_CANDIDATE_DASHBOARD_URL
 
-    if request.user.is_authenticated:
-        if request.user.is_staff:
-            return redirect("/admin/")
-        return redirect("home")
+
+def _signin_view(request, selected_role=None):
+    error_message = None
+    active_role = selected_role
 
     if request.method == "POST":
+        active_role = request.POST.get("role", active_role or "candidate").strip().lower()
+        if active_role not in {"candidate", "company"}:
+            active_role = "candidate"
+
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
             login(request, user)
-            next_url = request.GET.get("next", "/")
-            if user.is_staff and next_url == "/":
+            if user.is_staff:
                 return redirect("/admin/")
+            next_url = request.GET.get("next") or _role_dashboard_url(active_role)
             return redirect(next_url)
 
         error_message = "Invalid email or password. Please try again."
 
-    return render(request, "signin.html", _signin_context(error_message=error_message))
+    active_role = active_role or "candidate"
+    return render(
+        request,
+        "signin.html",
+        _signin_context(
+            error_message=error_message,
+            active_role=active_role,
+            is_role_specific_page=selected_role in {"candidate", "company"},
+            role_page_title="Candidate Sign In" if active_role == "candidate" else "Company Sign In",
+            form_action=request.path,
+        ),
+    )
+
+
+def signin_view(request):
+    return _signin_view(request)
+
+
+def candidate_signin_view(request):
+    return _signin_view(request, selected_role="candidate")
+
+
+def company_signin_view(request):
+    return _signin_view(request, selected_role="company")
 
 
 def password_reset_view(request):
@@ -112,4 +149,4 @@ def password_reset_view(request):
             )
         success = True
 
-    return render(request, "signin.html", _signin_context(reset_success=success))
+    return render(request, "signin.html", _signin_context(reset_success=success, active_role="candidate"))

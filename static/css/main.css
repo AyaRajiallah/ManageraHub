@@ -731,14 +731,13 @@ body.menu-open {
     align-items: center;
     justify-content: center;
     padding: 32px 20px;
-    background:
-        url("/static/images/admin-login-bg.jpg") center center / cover no-repeat;
+    background: linear-gradient(180deg, #f1faee 0%, #e8efe7 100%);
 }
 
 .admin-auth-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(10, 12, 20, 0.56);
+    background: transparent;
 }
 
 .admin-auth-card {
@@ -746,13 +745,13 @@ body.menu-open {
     z-index: 1;
     width: min(100%, 520px);
     padding: 34px 30px 30px;
-    background: rgba(20, 20, 30, 0.45);
+    background: rgba(248, 251, 243, 0.98);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(79, 12, 40, 0.12);
     border-radius: 28px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
-    color: #ffffff;
+    box-shadow: 0 20px 50px rgba(79, 12, 40, 0.12);
+    color: #2b2230;
 }
 
 .admin-auth-copy {
@@ -766,7 +765,7 @@ body.menu-open {
     font-size: 0.78rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgba(197, 210, 248, 0.88);
+    color: var(--plum);
 }
 
 .admin-auth-copy h1 {
@@ -776,13 +775,13 @@ body.menu-open {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #ffffff;
+    color: var(--plum);
 }
 
 .admin-auth-copy p {
     margin: 0;
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--text-soft);
 }
 
 .admin-auth-form {
@@ -793,9 +792,9 @@ body.menu-open {
 .admin-auth-error {
     padding: 12px 14px;
     border-radius: 16px;
-    background: rgba(132, 71, 255, 0.18);
-    border: 1px solid rgba(197, 210, 248, 0.24);
-    color: #ffffff;
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.18);
+    color: #8f2434;
     font-size: 0.92rem;
 }
 
@@ -807,7 +806,7 @@ body.menu-open {
 .admin-auth-field span {
     font-size: 0.86rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--plum);
 }
 
 .admin-auth-field input {
@@ -815,19 +814,19 @@ body.menu-open {
     min-height: 54px;
     padding: 0 18px;
     border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    border: 1px solid var(--line-soft);
+    background: rgba(241, 250, 238, 0.95);
+    color: var(--text-main);
     outline: none;
 }
 
 .admin-auth-field input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-soft);
 }
 
 .admin-auth-field input:focus {
-    border-color: rgba(197, 210, 248, 0.7);
-    box-shadow: 0 0 0 3px rgba(116, 102, 255, 0.16);
+    border-color: var(--line-strong);
+    box-shadow: 0 0 0 3px rgba(200, 213, 176, 0.24);
 }
 
 .admin-auth-submit,
@@ -843,23 +842,31 @@ body.menu-open {
 
 .admin-auth-submit {
     border: none;
-    background: linear-gradient(135deg, #6d68ff, #8878ff);
+    background: var(--plum);
     color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 16px 34px rgba(77, 69, 173, 0.24);
+    box-shadow: var(--shadow-soft);
 }
 
 .admin-auth-submit:hover,
-.admin-auth-submit:focus-visible,
+.admin-auth-submit:focus-visible {
+    background: var(--plum-deep);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-card);
+}
+
 .admin-auth-secondary:hover,
 .admin-auth-secondary:focus-visible {
+    background: rgba(241, 250, 238, 0.95);
+    border-color: var(--line-strong);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
 }
 
 .admin-auth-secondary {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
+    border: 1px solid var(--line-soft);
+    background: rgba(241, 250, 238, 0.8);
+    color: var(--plum);
 }
 
 .admin-dashboard-shell {

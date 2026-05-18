@@ -69,6 +69,13 @@ input[type="submit"] {
     font-family: "Poppins", sans-serif;
 }
 
+#site-name {
+    font-family: "Great Vibes", cursive !important;
+    font-style: italic !important;
+    font-size: 1.5rem !important;
+    color: #4f0c28 !important;
+}
+
 a:link,
 a:visited {
     color: var(--mh-plum);
@@ -83,28 +90,40 @@ a:hover {
 }
 
 #header {
-    background: transparent;
+    width: min(95vw, 1660px);
+    box-sizing: border-box;
+    margin: 20px auto 16px;
+    padding: 10px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(180deg, rgba(241, 250, 238, 0.98), rgba(237, 246, 232, 0.96));
     color: var(--mh-text-main);
-    box-shadow: none;
-    padding: 18px 0 8px;
+    box-shadow: 0 10px 26px rgba(79, 12, 40, 0.06);
+    border: 1px solid rgba(79, 12, 40, 0.08);
+    border-radius: 28px;
+}
+
+#header .mh-brand-text span,
+#header .mh-brand-text span:first-child {
+    font-family: "Great Vibes", cursive !important;
+    font-style: italic !important;
 }
 
 #branding {
     float: none;
+    width: 100%;
+    min-width: 0;
 }
 
 .mh-brand-shell {
     display: flex;
     align-items: center;
-    width: min(96vw, 1560px);
-    margin: 0 auto;
-    padding: 10px 16px;
-    background: rgba(241, 250, 238, 0.42);
-    border: 1px solid rgba(255, 255, 255, 0.42);
-    border-radius: var(--mh-radius-pill);
-    box-shadow: 0 10px 26px rgba(79, 12, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(20px) saturate(135%);
-    -webkit-backdrop-filter: blur(20px) saturate(135%);
+    justify-content: space-between;
+    width: 100%;
+    gap: 14px;
+    min-width: 0;
 }
 
 .mh-brand-link {
@@ -130,33 +149,124 @@ a:hover {
 
 .mh-brand-text {
     display: grid;
-    gap: 2px;
+    gap: 0;
 }
 
-.mh-brand-text strong {
+.mh-brand-script {
+    font-family: "Great Vibes", cursive;
+    font-size: clamp(1.42rem, 1.9vw, 1.95rem);
+    font-style: italic;
     color: var(--mh-plum);
-    font-size: 1.05rem;
-    letter-spacing: 0.03em;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.1;
 }
 
-.mh-brand-text span {
+.mh-brand-link-script {
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.mh-brand-script-text {
+    font-family: "Great Vibes", cursive;
+    font-size: clamp(1.18rem, 1.58vw, 1.55rem);
+    font-style: italic;
+    line-height: 1;
+    color: var(--mh-plum);
+    white-space: nowrap;
+}
+
+.mh-admin-center-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    margin-left: 22px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.mh-admin-center-nav a,
+.mh-user-nav > a,
+.mh-user-welcome,
+#mh-logout-form button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 12px;
+    border-radius: var(--mh-radius-pill);
+    border: 1px solid rgba(79, 12, 40, 0.15);
+    background: rgba(249, 251, 244, 0.88);
+    color: var(--mh-plum) !important;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.mh-admin-center-nav a:hover,
+.mh-user-nav > a:hover,
+#mh-logout-form button:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(79, 12, 40, 0.22);
+    box-shadow: 0 10px 18px rgba(79, 12, 40, 0.08);
+}
+
+.mh-brand-script-sub {
+    font-family: "Great Vibes", cursive;
+    font-size: 1rem;
+    font-style: italic;
     color: var(--mh-text-soft);
-    font-size: 0.72rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.mh-brand-title {
+    font-family: "Great Vibes", cursive;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--mh-plum);
+    line-height: 1.1;
+    display: block;
+}
+
+.mh-brand-subtitle {
+    font-family: "Great Vibes", cursive;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--mh-text-soft);
+    line-height: 1;
+    display: block;
+}
+
+.mh-topbar-script {
+    font-family: "Great Vibes", cursive;
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--mh-plum);
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1;
 }
 
 #user-tools {
-    left: 50%;
-    right: auto;
-    top: 40px;
-    transform: translateX(-50%);
+    position: static;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 22px;
+    justify-content: flex-end;
+    gap: 8px;
     color: var(--mh-text-soft);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
 }
 
 #user-tools a {
@@ -168,38 +278,89 @@ a:hover {
 }
 
 .mh-user-welcome {
-    color: var(--mh-plum);
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    color: rgba(79, 12, 40, 0.65);
+    font-weight: 500;
+    letter-spacing: 0.045em;
     text-transform: uppercase;
+    cursor: default;
+    min-width: 148px;
 }
 
 .mh-user-nav {
     display: inline-flex;
     align-items: center;
-    gap: 14px;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.mh-user-menu {
+    position: relative;
+}
+
+.mh-user-menu summary {
+    list-style: none;
+}
+
+.mh-user-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.mh-user-menu-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 170px;
+    padding: 8px;
+    display: grid;
+    gap: 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(79, 12, 40, 0.12);
+    background: rgba(249, 251, 244, 0.98);
+    box-shadow: 0 18px 38px rgba(79, 12, 40, 0.12);
+    z-index: 30;
+}
+
+.mh-user-menu:not([open]) .mh-user-menu-panel {
+    display: none;
+}
+
+.mh-user-menu-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    width: 100%;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(79, 12, 40, 0.12);
+    background: rgba(255, 255, 255, 0.86);
+    color: var(--mh-plum) !important;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.mh-user-menu-link:hover {
+    background: rgba(255, 255, 255, 1);
 }
 
 #mh-logout-form {
     display: inline-flex;
     margin: 0;
+    width: 100%;
 }
 
 #mh-logout-form button {
-    border: 0;
-    background: transparent;
-    color: var(--mh-plum);
     font: inherit;
     cursor: pointer;
-    padding: 0;
-}
-
-#mh-logout-form button:hover {
-    color: var(--mh-plum-deep);
 }
 
 div.breadcrumbs {
-    width: min(96vw, 1560px);
+    width: min(96vw, 1780px);
     margin: 0 auto 14px;
     padding: 12px 18px;
     background: rgba(241, 250, 238, 0.94);
@@ -207,6 +368,66 @@ div.breadcrumbs {
     border-radius: 18px;
     box-shadow: var(--mh-shadow-soft);
     color: var(--mh-text-soft);
+}
+
+@media (max-width: 1200px) {
+    #header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .mh-brand-shell {
+        flex-direction: column;
+    }
+
+    .mh-admin-center-nav,
+    .mh-user-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .mh-admin-center-nav {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 900px) {
+    #header {
+        width: min(96vw, 1660px);
+        padding: 12px 14px;
+    }
+
+    .mh-brand-shell {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .mh-admin-center-nav {
+        margin-left: 0;
+    }
+
+    #user-tools,
+    .mh-user-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 720px) {
+    #header {
+        padding: 16px;
+        border-radius: 24px;
+    }
+
+    .mh-admin-center-nav a,
+    .mh-user-nav > a,
+    .mh-user-welcome,
+    #mh-logout-form button {
+        min-height: 40px;
+        padding: 0 14px;
+        font-size: 0.9rem;
+    }
 }
 
 div.breadcrumbs a {
@@ -317,7 +538,7 @@ a.button:hover {
 
 .deletelink,
 .deletelink-box a {
-    background: #a52d44;
+    background: var(--mh-plum-deep);
     color: #fff;
     border-radius: var(--mh-radius-pill);
 }
@@ -583,15 +804,50 @@ ul.errorlist {
 .mh-home-admin-topbar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
     justify-content: space-between;
-    padding: 10px 16px;
+    padding: 12px 20px;
     background: rgba(241, 250, 238, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.42);
     border-radius: var(--mh-radius-pill);
     box-shadow: 0 10px 26px rgba(79, 12, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(20px) saturate(135%);
     -webkit-backdrop-filter: blur(20px) saturate(135%);
+}
+
+.mh-admin-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mh-admin-title {
+    font-size: 1.4rem;
+}
+
+.mh-admin-welcome {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--mh-text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mh-home-pill-light {
+    background: #fffdf9;
+    color: var(--mh-plum);
+    border: 1px solid var(--mh-line-soft);
+}
+    font-size: 1.2rem;
 }
 
 .mh-home-admin-links,
@@ -650,14 +906,14 @@ ul.errorlist {
 
 .mh-home-admin-card {
     display: grid;
-    grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+    grid-template-columns: 1fr;
     align-items: center;
-    gap: 16px;
-    padding: 18px;
-    background: var(--mh-plum);
-    color: var(--mh-offwhite);
+    gap: 24px;
+    padding: 32px 28px;
+    background: linear-gradient(135deg, rgba(200, 213, 176, 0.25) 0%, rgba(248, 251, 243, 0.95) 100%);
+    border: 1px solid var(--mh-line-soft);
     max-width: 1200px;
-    min-height: 320px;
+    min-height: auto;
     margin: 0 auto;
     border-radius: var(--mh-radius-card);
     box-shadow: var(--mh-shadow-soft);
@@ -682,7 +938,7 @@ ul.errorlist {
 .mh-home-admin-card .mh-home-kicker,
 .mh-home-admin-card h1,
 .mh-home-admin-card p {
-    color: var(--mh-offwhite);
+    color: var(--mh-text-main);
 }
 
 .mh-home-admin-card h1,
@@ -697,8 +953,8 @@ ul.errorlist {
 }
 
 .mh-home-admin-card h1 {
-    font-size: clamp(1.9rem, 4vw, 2.7rem);
-    line-height: 1.05;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    line-height: 1.1;
 }
 
 .mh-home-admin-card p,
@@ -730,14 +986,23 @@ ul.errorlist {
 }
 
 .mh-home-pill-dark {
-    background: var(--mh-plum-deep);
+    background: var(--mh-plum);
     color: var(--mh-offwhite);
+}
+
+.mh-home-pill-dark:hover {
+    background: var(--mh-plum-deep);
 }
 
 .mh-home-pill-light {
     background: #fffdf9;
     color: var(--mh-plum);
     border-color: var(--mh-line-soft);
+}
+
+.mh-home-pill-light:hover {
+    background: var(--mh-surface);
+    border-color: var(--mh-line-strong);
 }
 
 .mh-home-admin-visual {
@@ -858,8 +1123,11 @@ ul.errorlist {
     margin: 0 18px;
     padding: 24px;
     border-radius: 28px;
-    background: var(--mh-paper);
-    box-shadow: var(--mh-shadow-soft);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(249, 251, 246, 0.92) 100%);
+    border: 1px solid rgba(79, 12, 40, 0.07);
+    box-shadow: 0 18px 36px rgba(79, 12, 40, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .mh-home-admin-table-head {
@@ -886,24 +1154,41 @@ ul.errorlist {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    background: transparent;
+    border: 1px solid rgba(79, 12, 40, 0.08);
+    border-radius: 22px;
+    overflow: hidden;
 }
 
 .mh-home-table thead th {
-    background: rgba(228, 236, 218, 0.88);
-    color: var(--mh-text-soft);
-    border-bottom: 1px solid var(--mh-line-soft);
+    background: linear-gradient(180deg, rgba(247, 244, 247, 0.96) 0%, rgba(243, 246, 240, 0.96) 100%);
+    color: rgba(79, 12, 40, 0.64);
+    border-bottom: 1px solid rgba(79, 12, 40, 0.08);
     font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
+}
+
+.mh-home-table tbody tr {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.mh-home-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.98) !important;
 }
 
 .mh-home-table tbody tr:nth-child(even) {
-    background: rgba(200, 213, 176, 0.14);
+    background: rgba(248, 247, 244, 0.96) !important;
+}
+
+.mh-home-table tbody tr:hover {
+    background: rgba(242, 238, 244, 0.94) !important;
 }
 
 .mh-home-table tbody td {
-    border-top: 1px solid rgba(79, 12, 40, 0.06);
+    border-top: 1px solid rgba(79, 12, 40, 0.05);
     color: var(--mh-text-main);
+    background: transparent !important;
 }
 
 .mh-home-table th,
@@ -916,23 +1201,37 @@ ul.errorlist {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 96px;
-    padding: 6px 12px;
+    min-width: 104px;
+    padding: 6px 14px;
     border-radius: var(--mh-radius-pill);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    border: 1px solid rgba(79, 12, 40, 0.08);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
 .mh-home-status.active {
-    background: rgba(80, 227, 165, 0.15);
-    color: #2f8f63;
+    background: linear-gradient(180deg, rgba(241, 248, 245, 0.98) 0%, rgba(230, 239, 235, 0.98) 100%);
+    border-color: rgba(92, 128, 116, 0.14);
+    color: #4f6f63;
 }
 
 .mh-home-status.inactive {
-    background: rgba(255, 189, 102, 0.16);
-    color: #9c6730;
+    background: linear-gradient(180deg, rgba(247, 241, 244, 0.98) 0%, rgba(238, 229, 234, 0.98) 100%);
+    border-color: rgba(79, 12, 40, 0.12);
+    color: #7a5464;
+}
+
+.mh-home-status-icon-cell {
+    text-align: center !important;
+}
+
+.mh-home-status-icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
 }
 
 @media (max-width: 1280px) {
@@ -1027,4 +1326,230 @@ ul.errorlist {
     .mh-home-admin-table-head {
         flex-direction: column;
     }
+}
+
+/* Override any remaining dark/black text */
+#changelist table tbody td a,
+#changelist table tbody th a,
+.results tbody td a,
+.results tbody th a,
+.module a,
+.field-a url a,
+.row1 td a,
+.row2 td a {
+    color: var(--mh-plum) !important;
+}
+
+#changelist table tbody td,
+#changelist table tbody th,
+.results tbody td,
+.results tbody th,
+.module td,
+.module th {
+    color: var(--mh-text-main) !important;
+}
+
+#changelist table thead th a:link,
+#changelist table thead th a:visited,
+.results thead th a:link,
+.results thead th a:visited {
+    color: var(--mh-text-soft) !important;
+}
+
+/* Ensure all text in admin uses theme colors */
+#container,
+#content,
+.module caption,
+.paginator,
+.form-row,
+#toolbar,
+ul.errorlist li,
+.errornote {
+    color: var(--mh-text-main);
+}
+
+/* Links in admin */
+#content a:link,
+#content a:visited,
+.module a:link,
+.module a:visited {
+    color: var(--mh-plum);
+}
+
+#content a:hover,
+.module a:hover {
+    color: var(--mh-plum-deep);
+}
+
+/* Force light theme on Django admin utility bars still rendered dark */
+.change-list #toolbar,
+.change-list #changelist .actions,
+.change-list #changelist-filter,
+.change-list .paginator,
+.change-list ul.object-tools a,
+.change-list #result_list,
+.change-list #changelist-form .results,
+.change-list #changelist table,
+.change-form .module,
+.change-form .inline-group,
+.change-form .submit-row,
+.delete-confirmation form,
+.object-history,
+#content-related,
+.selector,
+.calendarbox,
+.clockbox {
+    background: linear-gradient(180deg, rgba(248, 251, 243, 0.98) 0%, rgba(241, 250, 238, 0.98) 100%) !important;
+    color: var(--mh-text-main) !important;
+    border-color: var(--mh-line-soft) !important;
+    box-shadow: var(--mh-shadow-soft) !important;
+}
+
+.change-list #toolbar,
+.change-list #changelist .actions,
+.change-list #changelist-filter,
+.change-list .paginator {
+    border-radius: 24px !important;
+}
+
+.change-list #toolbar input,
+.change-list #toolbar select,
+.change-list #changelist .actions select,
+.change-list #changelist .actions input,
+.change-form input,
+.change-form textarea,
+.change-form select,
+.selector select {
+    background: rgba(241, 250, 238, 0.95) !important;
+    color: var(--mh-text-main) !important;
+    border-color: var(--mh-line-soft) !important;
+}
+
+.change-list #toolbar input:focus,
+.change-list #toolbar select:focus,
+.change-list #changelist .actions select:focus,
+.change-form input:focus,
+.change-form textarea:focus,
+.change-form select:focus,
+.selector select:focus {
+    border-color: rgba(140, 144, 125, 0.7) !important;
+    box-shadow: 0 0 0 3px rgba(200, 213, 176, 0.24) !important;
+}
+
+.change-list #changelist-filter h2,
+.change-list #changelist-filter h3,
+.change-list #toolbar label,
+.change-list .actions label,
+.change-list .actions,
+.change-list .paginator,
+.change-form .form-row,
+.change-form .help,
+.change-form p.help {
+    color: var(--mh-text-main) !important;
+}
+
+.change-list #changelist-filter a,
+.change-list #toolbar a,
+.change-list .actions a,
+.change-list .paginator a,
+.change-form a,
+.object-history a {
+    color: var(--mh-plum) !important;
+}
+
+.change-list ul.object-tools a,
+.change-list .object-tools a.addlink,
+.object-tools a.addlink {
+    background: var(--mh-plum) !important;
+    color: var(--mh-offwhite) !important;
+    border: 1px solid transparent !important;
+}
+
+.change-list ul.object-tools a:hover,
+.change-list .object-tools a.addlink:hover,
+.object-tools a.addlink:hover {
+    background: var(--mh-plum-deep) !important;
+    color: var(--mh-offwhite) !important;
+}
+
+body.app-auth.model-user.change-list ul.object-tools,
+body.app-auth.model-user.change-list .object-tools {
+    display: none !important;
+}
+
+body.app-auth.model-user.change-list div.breadcrumbs {
+    display: none !important;
+}
+
+body.app-auth.model-user.change-list #result_list,
+body.app-auth.model-user.change-list #changelist table {
+    width: 100% !important;
+    background: transparent !important;
+    border: 1px solid rgba(79, 12, 40, 0.08) !important;
+    border-radius: 22px !important;
+    box-shadow: none !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    overflow: hidden !important;
+}
+
+body.app-auth.model-user.change-list #changelist table thead th,
+body.app-auth.model-user.change-list #result_list thead th,
+body.app-auth.model-user.change-list .results thead th {
+    background: linear-gradient(180deg, rgba(247, 244, 247, 0.96) 0%, rgba(243, 246, 240, 0.96) 100%) !important;
+    color: rgba(79, 12, 40, 0.64) !important;
+    border-bottom: 1px solid rgba(79, 12, 40, 0.08) !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.14em !important;
+    padding: 14px 16px !important;
+}
+
+body.app-auth.model-user.change-list #changelist table tbody tr,
+body.app-auth.model-user.change-list #result_list tbody tr,
+body.app-auth.model-user.change-list .results tbody tr {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+body.app-auth.model-user.change-list #changelist table tbody tr:nth-child(odd),
+body.app-auth.model-user.change-list #result_list tbody tr:nth-child(odd),
+body.app-auth.model-user.change-list .results tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+body.app-auth.model-user.change-list #changelist table tbody tr:nth-child(even),
+body.app-auth.model-user.change-list #result_list tbody tr:nth-child(even),
+body.app-auth.model-user.change-list .results tbody tr:nth-child(even) {
+    background: rgba(248, 247, 244, 0.96) !important;
+}
+
+body.app-auth.model-user.change-list #changelist table tbody tr:hover,
+body.app-auth.model-user.change-list #result_list tbody tr:hover,
+body.app-auth.model-user.change-list .results tbody tr:hover {
+    background: rgba(242, 238, 244, 0.94) !important;
+}
+
+body.app-auth.model-user.change-list #changelist table tbody td,
+body.app-auth.model-user.change-list #changelist table tbody th,
+body.app-auth.model-user.change-list #result_list tbody td,
+body.app-auth.model-user.change-list #result_list tbody th,
+body.app-auth.model-user.change-list .results tbody td,
+body.app-auth.model-user.change-list .results tbody th {
+    border-top: 1px solid rgba(79, 12, 40, 0.05) !important;
+    color: var(--mh-text-main) !important;
+    background: transparent !important;
+    padding: 14px 16px !important;
+}
+
+.change-list #changelist table thead th,
+.change-list #result_list thead th,
+.change-list .results thead th {
+    background: rgba(228, 236, 218, 0.88) !important;
+    color: var(--mh-text-soft) !important;
+}
+
+.change-list #changelist table tbody tr:nth-child(even),
+.change-list #result_list tbody tr:nth-child(even),
+.change-list .results tbody tr:nth-child(even) {
+    background: rgba(200, 213, 176, 0.14) !important;
 }

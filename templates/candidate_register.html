@@ -216,7 +216,7 @@
             <h1 class="reg-left-title">Start your career journey</h1>
             <p class="reg-left-desc">Create your profile, upload your CV, discover opportunities, and track every application — all in one place.</p>
             <span class="reg-left-tag">Free for all candidates</span>
-            <p class="reg-already">Already have an account? <a href="/signin">Sign in here</a></p>
+            <p class="reg-already">Already have an account? <a href="{% url 'signin' %}">Sign in here</a></p>
         </div>
     </div>
 
@@ -357,7 +357,7 @@
             </div>
 
             <button type="submit" class="reg-submit">Create Candidate Account</button>
-            <p class="signin-link">Already registered? <a href="/signin">Sign in</a></p>
+            <p class="signin-link">Already registered? <a href="{% url 'signin' %}">Sign in</a></p>
         </form>
     </div>
 
