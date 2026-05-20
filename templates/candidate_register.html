@@ -367,9 +367,12 @@
         pwdC.addEventListener('input', () => {
             pwdC.setCustomValidity(pwd.value !== pwdC.value ? 'Passwords do not match.' : '');
         });
-        document.getElementById('cv-input').addEventListener('change', function () {
-            document.getElementById('cv-label').textContent = this.files[0] ? this.files[0].name : 'PDF, DOC or DOCX — max 5 MB';
-        });
+        const cvInput = document.getElementById('cv-input');
+        if (cvInput) {
+            cvInput.addEventListener('change', function () {
+                document.getElementById('cv-label').textContent = this.files[0] ? this.files[0].name : 'PDF, DOC or DOCX - max 5 MB';
+            });
+        }
     </script>
 </body>
 </html>

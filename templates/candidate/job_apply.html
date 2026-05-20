@@ -1,0 +1,74 @@
+{% extends "candidate/base.html" %}
+
+{% block title %}Apply to {{ job.title }} | ManageraHub{% endblock %}
+
+{% block candidate_main %}
+<section class="candidate-hero-card">
+    <p class="candidate-card-kicker">Apply Online</p>
+    <h1>Apply to {{ job.title }}</h1>
+    <p>{{ job.company_name }} · {{ job.city }}{% if job.is_remote %} · Remote{% endif %}. Your saved profile data is prefilled below and can be edited before you submit.</p>
+</section>
+
+<section class="candidate-panel-card candidate-panel-card-wide">
+    <p class="candidate-card-kicker">Application form</p>
+    <form method="post" enctype="multipart/form-data" class="candidate-form-grid">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="candidate-form-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="candidate-form-row">
+            <div class="candidate-form-field">
+                <label for="{{ form.full_name.id_for_label }}">Full name</label>
+                {{ form.full_name }}
+                {% if form.full_name.errors %}<div class="candidate-form-error">{{ form.full_name.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="candidate-form-field">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="candidate-form-error">{{ form.email.errors|join:", " }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="candidate-form-field">
+            <label for="{{ form.phone_number.id_for_label }}">Phone</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<div class="candidate-form-error">{{ form.phone_number.errors|join:", " }}</div>{% endif %}
+        </div>
+
+        <div class="candidate-form-field">
+            <label for="{{ form.application_text.id_for_label }}">Application message</label>
+            {{ form.application_text }}
+            {% if form.application_text.errors %}<div class="candidate-form-error">{{ form.application_text.errors|join:", " }}</div>{% endif %}
+        </div>
+
+        <div class="candidate-form-row">
+            <div class="candidate-form-field">
+                <label class="candidate-checkbox-label">
+                    {{ form.use_profile_cv }}
+                    <span>Use the CV already saved in my profile{% if candidate_profile.cv_file %} (current file available){% endif %}</span>
+                </label>
+                <label for="{{ form.cv_file.id_for_label }}">Or upload a different CV</label>
+                {{ form.cv_file }}
+                {% if form.cv_file.errors %}<div class="candidate-form-error">{{ form.cv_file.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="candidate-form-field">
+                <label class="candidate-checkbox-label">
+                    {{ form.use_profile_cover_letter }}
+                    <span>Use the cover letter already saved in my profile{% if candidate_profile.cover_letter_file %} (current file available){% endif %}</span>
+                </label>
+                <label for="{{ form.cover_letter_file.id_for_label }}">Or upload a different cover letter</label>
+                {{ form.cover_letter_file }}
+                {% if form.cover_letter_file.errors %}<div class="candidate-form-error">{{ form.cover_letter_file.errors|join:", " }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="candidate-card-actions">
+            <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Send application</button>
+            <a href="{% url 'candidate_job_detail' job.id %}" class="pill-button pill-button-light">Back to job details</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

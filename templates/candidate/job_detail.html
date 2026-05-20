@@ -1,0 +1,64 @@
+{% extends "candidate/base.html" %}
+
+{% block title %}{{ job.title }} | ManageraHub{% endblock %}
+
+{% block candidate_main %}
+<section class="candidate-hero-card">
+    <p class="candidate-card-kicker">Job Details</p>
+    <h1>{{ job.title }}</h1>
+    <p>{{ job.company_name }} · {{ job.city }}{% if job.is_remote %} · Remote{% endif %}</p>
+    <div class="candidate-job-tags">
+        <span>{{ job.get_job_type_display }}</span>
+        <span>{{ job.get_contract_type_display }}</span>
+        <span>{{ job.get_experience_level_display }}</span>
+        {% if job.salary_range %}<span>{{ job.salary_range }}</span>{% endif %}
+    </div>
+    <div class="candidate-hero-actions">
+        {% if existing_application %}
+        <span class="candidate-status-chip">Application already sent</span>
+        {% else %}
+        <a href="{% url 'candidate_job_apply' job.id %}" class="pill-button pill-button-dark">Apply online</a>
+        {% endif %}
+        <a href="{% url 'candidate_job_offers' %}" class="pill-button pill-button-light">Back to job offers</a>
+    </div>
+</section>
+
+{% if application_success %}
+<section class="candidate-alert candidate-alert-success">
+    Your application has been submitted successfully.
+</section>
+{% endif %}
+
+<section class="candidate-content-grid">
+    <article class="candidate-panel-card candidate-panel-card-wide">
+        <p class="candidate-card-kicker">Overview</p>
+        <h2>About this role</h2>
+        <p>{{ job.summary|linebreaksbr }}</p>
+
+        <p class="candidate-card-kicker candidate-subsection-kicker">Responsibilities</p>
+        <p>{{ job.responsibilities|linebreaksbr }}</p>
+
+        <p class="candidate-card-kicker candidate-subsection-kicker">Requirements</p>
+        <p>{{ job.requirements|linebreaksbr }}</p>
+    </article>
+
+    <article class="candidate-panel-card">
+        <p class="candidate-card-kicker">Company</p>
+        <h3>{{ job.company_name }}</h3>
+        <p>{{ job.city }}, {{ job.country }}</p>
+        <p>Posted {{ job.posted_at|date:"M d, Y" }}</p>
+    </article>
+
+    <article class="candidate-panel-card">
+        <p class="candidate-card-kicker">Application</p>
+        {% if existing_application %}
+        <h3>Status: {{ existing_application.get_status_display }}</h3>
+        <p>You already applied to this offer on {{ existing_application.submitted_at|date:"M d, Y" }}.</p>
+        {% else %}
+        <h3>Ready to apply?</h3>
+        <p>Your saved profile and private documents can be reused in the online application form.</p>
+        <a href="{% url 'candidate_job_apply' job.id %}" class="pill-button pill-button-dark">Apply now</a>
+        {% endif %}
+    </article>
+</section>
+{% endblock %}

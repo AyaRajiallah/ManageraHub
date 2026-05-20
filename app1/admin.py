@@ -3,6 +3,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.admin.models import LogEntry
 
+from .models import CandidateCertification, CandidateProfile, CompanyProfile, JobApplication, JobOffer
+
 
 # Unregister default User admin to use custom one
 admin.site.unregister(User)
@@ -48,3 +50,36 @@ def custom_index(request, extra_context=None):
     return original_index(request, extra_context)
 
 admin.site.index = custom_index
+
+
+class CandidateCertificationInline(admin.TabularInline):
+    model = CandidateCertification
+    extra = 0
+
+
+@admin.register(CandidateProfile)
+class CandidateProfileAdmin(admin.ModelAdmin):
+    list_display = ("display_name", "phone_number", "city", "education_level", "is_public", "updated_at")
+    search_fields = ("user__first_name", "user__last_name", "user__username", "skills", "city")
+    list_filter = ("education_level", "is_public", "country")
+    inlines = [CandidateCertificationInline]
+
+
+@admin.register(CompanyProfile)
+class CompanyProfileAdmin(admin.ModelAdmin):
+    list_display = ("company_name", "phone_number", "city", "country", "updated_at")
+    search_fields = ("company_name", "user__username", "city")
+
+
+@admin.register(JobOffer)
+class JobOfferAdmin(admin.ModelAdmin):
+    list_display = ("title", "company_name", "city", "job_type", "contract_type", "experience_level", "is_active", "posted_at")
+    search_fields = ("title", "company_name", "city", "summary")
+    list_filter = ("job_type", "contract_type", "experience_level", "is_active", "is_remote")
+
+
+@admin.register(JobApplication)
+class JobApplicationAdmin(admin.ModelAdmin):
+    list_display = ("full_name", "job_offer", "status", "submitted_at")
+    search_fields = ("full_name", "email", "job_offer__title", "job_offer__company_name")
+    list_filter = ("status", "submitted_at")

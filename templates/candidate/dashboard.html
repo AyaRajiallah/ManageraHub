@@ -1,0 +1,112 @@
+{% extends "candidate/base.html" %}
+
+{% block title %}Candidate Dashboard | ManageraHub{% endblock %}
+
+{% block candidate_main %}
+<section class="candidate-hero-card">
+    <p class="candidate-card-kicker">Candidate Dashboard</p>
+    <h1>Stay organized through every opportunity.</h1>
+    <p>Your dashboard now shows real candidate data: profile completion, saved documents, application overview, and fresh job offers you can open or apply to.</p>
+    <div class="candidate-hero-actions">
+        <a href="{% url 'candidate_profile' %}" class="pill-button pill-button-dark">Complete my profile</a>
+        <a href="{% url 'candidate_job_offers' %}" class="pill-button pill-button-light">Browse job offers</a>
+    </div>
+</section>
+
+<section class="candidate-stats-grid">
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Profile</p>
+        <strong>{{ candidate_completion_percent }}%</strong>
+        <span>Completion progress</span>
+    </article>
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Applications</p>
+        <strong>{{ candidate_stats.applications }}</strong>
+        <span>Submitted job applications</span>
+    </article>
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Documents</p>
+        <strong>{{ candidate_stats.saved_docs }}</strong>
+        <span>Private files saved in your profile</span>
+    </article>
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Jobs</p>
+        <strong>{{ candidate_stats.recent_jobs }}</strong>
+        <span>Active job offers available</span>
+    </article>
+</section>
+
+<section class="candidate-content-grid">
+    <article class="candidate-panel-card candidate-panel-card-wide">
+        <p class="candidate-card-kicker">Profile completion</p>
+        <h2>What still needs attention?</h2>
+        {% if profile_missing_items %}
+        <div class="candidate-list-card">
+            {% for item in profile_missing_items %}
+            <div class="candidate-list-item">
+                <span>{{ item }}</span>
+                <a href="{% url 'candidate_profile' %}">Update</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="candidate-placeholder-card">
+            <h3>Your profile is in a strong state.</h3>
+            <p>All major profile sections are filled in. You can still update documents or refresh your experience at any time.</p>
+        </div>
+        {% endif %}
+    </article>
+
+    <article class="candidate-panel-card">
+        <p class="candidate-card-kicker">Quick links</p>
+        <div class="candidate-mini-links">
+            <a href="{% url 'candidate_profile' %}" class="candidate-inline-link">Edit my profile</a>
+            <a href="{% url 'candidate_job_offers' %}" class="candidate-inline-link">Search jobs</a>
+        </div>
+    </article>
+
+    <article class="candidate-panel-card">
+        <p class="candidate-card-kicker">Applications overview</p>
+        {% if applications %}
+        <div class="candidate-mini-stack">
+            {% for application in applications %}
+            <div class="candidate-mini-entry">
+                <strong>{{ application.job_offer.title }}</strong>
+                <span>{{ application.job_offer.company_name }} · {{ application.get_status_display }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>You have not applied to a job yet. Start from the Job Offers page.</p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="candidate-panel-card candidate-panel-card-wide">
+    <p class="candidate-card-kicker">Recent jobs</p>
+    <h2>Fresh opportunities</h2>
+    <div class="candidate-job-grid">
+        {% for job in recent_jobs %}
+        <article class="candidate-job-card">
+            <p class="candidate-job-meta">{{ job.company_name }} · {{ job.city }}</p>
+            <h3>{{ job.title }}</h3>
+            <p>{{ job.summary|truncatewords:24 }}</p>
+            <div class="candidate-job-tags">
+                <span>{{ job.get_job_type_display }}</span>
+                <span>{{ job.get_contract_type_display }}</span>
+                <span>{{ job.get_experience_level_display }}</span>
+            </div>
+            <div class="candidate-card-actions">
+                <a href="{% url 'candidate_job_detail' job.id %}" class="pill-button pill-button-light">View details</a>
+                <a href="{% url 'candidate_job_apply' job.id %}" class="pill-button pill-button-dark">Apply</a>
+            </div>
+        </article>
+        {% empty %}
+        <div class="candidate-placeholder-card">
+            <h3>No active jobs yet.</h3>
+            <p>Job offers will appear here as soon as they are published.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

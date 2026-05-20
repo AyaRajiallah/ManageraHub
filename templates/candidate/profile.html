@@ -1,0 +1,783 @@
+{% extends "candidate/base.html" %}
+
+{% block title %}My Profile | ManageraHub{% endblock %}
+
+{% block candidate_main %}
+<section class="candidate-profile-header-card" id="profile-completion">
+    <div class="candidate-profile-cover" data-cover-preview>
+        <div class="candidate-profile-cover-actions">
+            <label for="candidate-cover-upload" class="candidate-profile-cover-action" aria-label="Update cover background">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M9 4l1.6-2h2.8L15 4h3a3 3 0 0 1 3 3v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a3 3 0 0 1 3-3h3zm3 5.2A4.8 4.8 0 1 0 16.8 14A4.8 4.8 0 0 0 12 9.2zm0 2A2.8 2.8 0 1 1 9.2 14a2.8 2.8 0 0 1 2.8-2.8z" fill="currentColor"></path>
+                </svg>
+            </label>
+            <button type="button" class="candidate-profile-cover-action" data-remove-cover-preview aria-label="Remove cover background preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                </svg>
+            </button>
+        </div>
+        <input type="file" id="candidate-cover-upload" accept="image/*" data-cover-upload-input hidden>
+    </div>
+
+    <div class="candidate-profile-header-body">
+        <div class="candidate-profile-header-main">
+            <div class="candidate-profile-header-avatar-wrap">
+                {% if candidate_profile.profile_picture %}
+                <img src="{{ candidate_profile.profile_picture.url }}" alt="{{ candidate_display_name }}" class="candidate-profile-header-avatar-image">
+                {% else %}
+                <span class="candidate-profile-header-avatar">{{ candidate_initials }}</span>
+                {% endif %}
+                <div class="candidate-profile-avatar-actions" data-avatar-menu-wrap>
+                    <button type="button" class="candidate-profile-avatar-edit" data-avatar-menu-toggle aria-expanded="false" aria-controls="candidate-avatar-menu" aria-label="Profile picture options">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                    <div class="candidate-profile-avatar-menu" id="candidate-avatar-menu" data-avatar-menu hidden>
+                        <label for="{{ form.profile_picture.id_for_label }}" class="candidate-profile-avatar-menu-item">
+                            Change picture
+                        </label>
+                        <button type="button" class="candidate-profile-avatar-menu-item is-danger" data-remove-profile-picture hidden>
+                            Remove picture
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="candidate-profile-header-copy">
+                <div class="candidate-profile-header-title-row">
+                    <div>
+                        <h1>{{ candidate_display_name }}</h1>
+                        <p class="candidate-profile-header-headline">
+                            {% if candidate_profile.headline %}
+                            {{ candidate_profile.headline }}
+                            {% elif candidate_profile.education_level %}
+                            Student profile focused on {{ candidate_profile.get_education_level_display }}
+                            {% else %}
+                            Candidate profile ready to showcase your skills and experience
+                            {% endif %}
+                        </p>
+                        <p class="candidate-profile-header-location">
+                            {% if candidate_profile.address %}{{ candidate_profile.address }}{% elif candidate_profile.city %}{{ candidate_profile.city }}{% else %}Morocco{% endif %}{% if candidate_profile.country %}, {{ candidate_profile.country }}{% endif %}
+                            {% if candidate_profile.phone_number or candidate_profile.user.email %}
+                            <a href="#contact-info" class="candidate-inline-link">Contact info</a>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <a href="#profile-editor" class="candidate-profile-edit-action" aria-label="Edit profile information">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="candidate-profile-header-actions">
+                    <a href="#profile-editor" class="pill-button pill-button-dark">Update profile</a>
+                    <a href="#skills-section" class="pill-button pill-button-light">Add section</a>
+                    <a href="#profile-editor" class="pill-button pill-button-light">Improve profile</a>
+                    <button type="button" class="pill-button pill-button-light">More</button>
+                </div>
+            </div>
+        </div>
+
+        <aside class="candidate-profile-header-side">
+            <div class="candidate-profile-side-item">
+                <strong>{% if candidate_profile.education_level %}{{ candidate_profile.get_education_level_display }}{% else %}Education{% endif %}</strong>
+                <span>{% if candidate_profile.headline %}Aligned with your current headline{% else %}Add your school or training focus in your headline{% endif %}</span>
+            </div>
+            <div class="candidate-profile-side-item">
+                <strong>{{ candidate_completion_percent }}% complete</strong>
+                <span>Keep your candidate profile polished and recruiter-ready.</span>
+                <div class="candidate-profile-side-progress">
+                    <span style="width: {{ candidate_completion_percent }}%;"></span>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+
+{% if saved %}
+<section class="candidate-alert candidate-alert-success">
+    Your profile has been updated successfully.
+</section>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="candidate-form-grid candidate-profile-form-grid" id="candidate-profile-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="candidate-form-errors">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+    <div class="candidate-profile-hidden-upload">
+        {{ form.profile_picture }}
+        {% if candidate_profile.profile_picture %}
+        <input type="checkbox" name="{{ form.profile_picture.html_name }}-clear" id="{{ form.profile_picture.id_for_label }}-clear" value="on" data-profile-picture-clear>
+        {% endif %}
+        {% if form.profile_picture.errors %}<div class="candidate-form-error">{{ form.profile_picture.errors|join:", " }}</div>{% endif %}
+    </div>
+    <button type="submit" class="candidate-profile-hidden-submit" data-profile-remove-submit aria-hidden="true" tabindex="-1">Hidden save</button>
+
+    <section class="candidate-profile-bio-card candidate-profile-section-card" data-profile-section>
+        <div class="candidate-profile-bio-head candidate-profile-section-head">
+            <div>
+                <h2>Bio</h2>
+                <p>Introduce your background, goals, and what you are looking for.</p>
+            </div>
+            <div class="candidate-profile-section-actions">
+                <button type="button" class="candidate-profile-section-icon candidate-profile-edit-action-light" data-profile-edit-toggle aria-expanded="false" aria-controls="section-bio" aria-label="Edit bio">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="candidate-profile-section-view candidate-profile-bio-content">
+            {% if candidate_profile.bio %}
+            <p>{{ candidate_profile.bio }}</p>
+            {% else %}
+            <p>Add a short bio to introduce your background, goals, and what kind of opportunities you are looking for.</p>
+            {% endif %}
+        </div>
+        <div class="candidate-profile-section-edit" id="section-bio" hidden>
+            <div class="candidate-form-field">
+                <label for="{{ form.bio.id_for_label }}">Short bio</label>
+                {{ form.bio }}
+                {% if form.bio.errors %}<div class="candidate-form-error">{{ form.bio.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="candidate-profile-section-edit-actions">
+                <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="candidate-profile-editor-card candidate-panel-card candidate-panel-card-wide" id="profile-editor">
+        <div class="candidate-profile-editor-head">
+            <div>
+                <p class="candidate-card-kicker">Profile sections</p>
+                <h2>Show your saved profile first, then update section by section</h2>
+                <p>Each card shows your current information. Open only the section you want to edit.</p>
+            </div>
+        </div>
+
+        <section class="candidate-profile-section-card" data-profile-section id="contact-info">
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>About / Core details</h3>
+                    <p>Identity, headline, and your public summary.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-core-details" aria-label="Edit About section">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <p class="candidate-profile-view-title">{{ candidate_display_name }}</p>
+                <p class="candidate-profile-view-copy">
+                    {% if candidate_profile.headline %}
+                    {{ candidate_profile.headline }}
+                    {% else %}
+                    Add a professional headline so recruiters quickly understand your direction.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-core-details" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.first_name.id_for_label }}">First name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="candidate-form-error">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field">
+                        <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="candidate-form-error">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="candidate-form-field">
+                    <label for="{{ form.headline.id_for_label }}">Professional headline</label>
+                    {{ form.headline }}
+                    {% if form.headline.errors %}<div class="candidate-form-error">{{ form.headline.errors|join:", " }}</div>{% endif %}
+                </div>
+
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Contact information</h3>
+                    <p>Email, phone, and profile visibility.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-contact" aria-label="Edit contact information">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-inline-list">
+                    <span>{{ candidate_profile.user.email }}</span>
+                    <span>{% if candidate_profile.phone_number %}{{ candidate_profile.phone_number }}{% else %}Add your phone number{% endif %}</span>
+                    <span>{% if candidate_profile.is_public %}Public profile enabled{% else %}Private profile{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-contact" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.phone_number.id_for_label }}">Phone</label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}<div class="candidate-form-error">{{ form.phone_number.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field candidate-checkbox-field">
+                        <label class="candidate-checkbox-label">
+                            {{ form.is_public }}
+                            <span>Allow your public candidate profile to show your visible professional information.</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Location</h3>
+                    <p>Region, city, and country.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-location" aria-label="Edit location details">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-inline-list">
+                    <span>{% if candidate_profile.address %}{{ candidate_profile.address }}{% else %}Add your region{% endif %}</span>
+                    <span>{% if candidate_profile.city %}{{ candidate_profile.city }}{% else %}Add your city{% endif %}</span>
+                    <span>{% if candidate_profile.country %}{{ candidate_profile.country }}{% else %}Add your country{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-location" hidden>
+                <div class="candidate-form-field">
+                    <label for="{{ form.address.id_for_label }}">Region</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}<div class="candidate-form-error">{{ form.address.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-form-field">
+                    <div class="candidate-form-row">
+                        <div class="candidate-form-field">
+                            <label for="{{ form.city.id_for_label }}">City</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}<div class="candidate-form-error">{{ form.city.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="candidate-form-field">
+                            <label for="{{ form.country.id_for_label }}">Country</label>
+                            {{ form.country }}
+                            {% if form.country.errors %}<div class="candidate-form-error">{{ form.country.errors|join:", " }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Education</h3>
+                    <p>Academic level and study direction.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-education" aria-label="Edit education">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-entry">
+                    <strong>{% if candidate_profile.education_level %}{{ candidate_profile.get_education_level_display }}{% else %}Education not added yet{% endif %}</strong>
+                    <span>{% if candidate_profile.headline %}{{ candidate_profile.headline }}{% else %}Add your education level so recruiters better understand your background.{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-education" hidden>
+                <div class="candidate-form-field">
+                    <label for="{{ form.education_level.id_for_label }}">Education</label>
+                    {{ form.education_level }}
+                    {% if form.education_level.errors %}<div class="candidate-form-error">{{ form.education_level.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Experience</h3>
+                    <p>Internships, projects, and career highlights.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-experience" aria-label="Edit experience">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-entry">
+                    <strong>{% if candidate_profile.headline %}{{ candidate_profile.headline }}{% else %}Experience section{% endif %}</strong>
+                    <span>{% if candidate_profile.experience_summary %}{{ candidate_profile.experience_summary }}{% else %}Add your experience summary to show what you have worked on so far.{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-experience" hidden>
+                <div class="candidate-form-field">
+                    <label for="{{ form.experience_summary.id_for_label }}">Experience</label>
+                    {{ form.experience_summary }}
+                    {% if form.experience_summary.errors %}<div class="candidate-form-error">{{ form.experience_summary.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section id="skills-section">
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Skills</h3>
+                    <p>Your tools, strengths, and areas of focus.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-skills" aria-label="Edit skills">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-entry">
+                    <strong>{% if candidate_profile.skills %}Key skills{% else %}Skills section{% endif %}</strong>
+                    <span>{% if candidate_profile.skills %}{{ candidate_profile.skills }}{% else %}Add your skills to make your profile easier to match with job offers.{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-skills" hidden>
+                <div class="candidate-form-field">
+                    <label for="{{ form.skills.id_for_label }}">Skills</label>
+                    {{ form.skills }}
+                    {% if form.skills.errors %}<div class="candidate-form-error">{{ form.skills.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>CV and documents</h3>
+                    <p>Profile picture, CV, and cover letter.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-documents" aria-label="Edit documents">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-entry-list">
+                    <div class="candidate-profile-entry">
+                        <strong>Profile picture</strong>
+                        <span>{% if candidate_profile.profile_picture %}Profile picture uploaded{% else %}No profile picture yet{% endif %}</span>
+                    </div>
+                    <div class="candidate-profile-entry">
+                        <strong>CV</strong>
+                        <span>
+                    {% if candidate_profile.cv_file %}
+                    <a href="{{ candidate_profile.cv_file.url }}" class="candidate-inline-link" target="_blank">Current CV</a>
+                    {% else %}
+                    No CV uploaded yet
+                    {% endif %}
+                        </span>
+                    </div>
+                    <div class="candidate-profile-entry">
+                        <strong>Cover letter</strong>
+                        <span>
+                    {% if candidate_profile.cover_letter_file %}
+                    <a href="{{ candidate_profile.cover_letter_file.url }}" class="candidate-inline-link" target="_blank">Current cover letter</a>
+                    {% else %}
+                    No cover letter uploaded yet
+                    {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-documents" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.cv_file.id_for_label }}">CV upload</label>
+                        {{ form.cv_file }}
+                        {% if candidate_profile.cv_file %}
+                        <a href="{{ candidate_profile.cv_file.url }}" class="candidate-inline-link" target="_blank">Current CV</a>
+                        {% endif %}
+                        {% if form.cv_file.errors %}<div class="candidate-form-error">{{ form.cv_file.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="candidate-form-field">
+                    <label for="{{ form.cover_letter_file.id_for_label }}">Cover letter upload</label>
+                    {{ form.cover_letter_file }}
+                    {% if candidate_profile.cover_letter_file %}
+                    <a href="{{ candidate_profile.cover_letter_file.url }}" class="candidate-inline-link" target="_blank">Current cover letter</a>
+                    {% endif %}
+                    {% if form.cover_letter_file.errors %}<div class="candidate-form-error">{{ form.cover_letter_file.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Certifications{% if candidate_profile.certifications.count %} ({{ candidate_profile.certifications.count }}){% endif %}</h3>
+                    <p>Uploaded certificates and learning proof.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-certifications" aria-label="Edit certifications">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-entry-list">
+                    {% for certification in candidate_profile.certifications.all %}
+                    <div class="candidate-profile-entry">
+                        <strong>Certification {{ forloop.counter }}</strong>
+                        <span><a href="{{ certification.file.url }}" class="candidate-inline-link" target="_blank">Open file</a></span>
+                    </div>
+                    {% empty %}
+                    <div class="candidate-profile-entry">
+                        <strong>No certifications yet</strong>
+                        <span>Add certificates to strengthen your profile.</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-certifications" hidden>
+                <div class="candidate-form-field">
+                    <label for="{{ form.certification_files.id_for_label }}">Certifications upload</label>
+                    <div class="candidate-upload-stack" data-certification-stack>
+                        <div class="candidate-upload-row">
+                            <input type="file" name="certification_files" id="{{ form.certification_files.id_for_label }}">
+                            <button type="button" class="candidate-upload-plus" data-add-certification aria-label="Add another certification">+</button>
+                        </div>
+                    </div>
+                    <template data-certification-template>
+                        <div class="candidate-upload-row">
+                            <input type="file" name="certification_files">
+                            <button type="button" class="candidate-upload-plus" data-add-certification aria-label="Add another certification">+</button>
+                            <button type="button" class="candidate-upload-remove" data-remove-certification aria-label="Remove certification field">Remove</button>
+                        </div>
+                    </template>
+                    <div class="candidate-profile-certifications-list">
+                        {% for certification in candidate_profile.certifications.all %}
+                        <a href="{{ certification.file.url }}" class="candidate-inline-link" target="_blank">Certification {{ forloop.counter }}</a>
+                        {% empty %}
+                        <span class="candidate-inline-link">No certifications uploaded yet.</span>
+                        {% endfor %}
+                    </div>
+                    {% if form.certification_files.errors %}<div class="candidate-form-error">{{ form.certification_files.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="candidate-card-actions">
+            <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save profile</button>
+            <a href="{% url 'candidate_dashboard' %}" class="pill-button pill-button-light">Back to dashboard</a>
+        </div>
+    </section>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (() => {
+        const certificationStack = document.querySelector("[data-certification-stack]");
+        const certificationTemplate = document.querySelector("[data-certification-template]");
+        const profileSections = Array.from(document.querySelectorAll("[data-profile-section]"));
+        const coverPreview = document.querySelector("[data-cover-preview]");
+        const coverUploadInput = document.querySelector("[data-cover-upload-input]");
+        const removeCoverPreviewButton = document.querySelector("[data-remove-cover-preview]");
+        const profileForm = document.getElementById("candidate-profile-form");
+        const profilePictureInput = document.getElementById("{{ form.profile_picture.id_for_label }}");
+        const profilePictureClearInput = document.querySelector("[data-profile-picture-clear]");
+        const profileRemoveSubmit = document.querySelector("[data-profile-remove-submit]");
+        const removeProfilePictureButton = document.querySelector("[data-remove-profile-picture]");
+        const profileAvatarWrap = document.querySelector(".candidate-profile-header-avatar-wrap");
+        const avatarMenuWrap = document.querySelector("[data-avatar-menu-wrap]");
+        const avatarMenuToggle = document.querySelector("[data-avatar-menu-toggle]");
+        const avatarMenu = document.querySelector("[data-avatar-menu]");
+        const ensureSavedAlert = () => {
+            let alertNode = document.querySelector(".candidate-alert-success");
+            if (alertNode) {
+                alertNode.textContent = "Your profile has been updated successfully.";
+                return;
+            }
+            const headerCard = document.querySelector(".candidate-profile-header-card");
+            if (!headerCard) {
+                return;
+            }
+            alertNode = document.createElement("section");
+            alertNode.className = "candidate-alert candidate-alert-success";
+            alertNode.textContent = "Your profile has been updated successfully.";
+            headerCard.insertAdjacentElement("afterend", alertNode);
+        };
+        const syncAvatarMenuState = () => {
+            const hasVisibleImage = !!document.querySelector(".candidate-profile-header-avatar-image");
+            if (removeProfilePictureButton) {
+                removeProfilePictureButton.hidden = !hasVisibleImage;
+            }
+        };
+        const openSection = (section) => {
+            profileSections.forEach((card) => {
+                const editPanel = card.querySelector(".candidate-profile-section-edit");
+                const toggle = card.querySelector("[data-profile-edit-toggle]");
+                const isTarget = card === section;
+                if (!editPanel || !toggle) {
+                    return;
+                }
+                editPanel.hidden = !isTarget;
+                card.classList.toggle("is-editing", isTarget);
+                toggle.setAttribute("aria-expanded", String(isTarget));
+            });
+        };
+
+        profileSections.forEach((section) => {
+            const toggle = section.querySelector("[data-profile-edit-toggle]");
+            const cancel = section.querySelector("[data-profile-cancel]");
+            if (toggle) {
+                toggle.addEventListener("click", () => {
+                    const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+                    if (isExpanded) {
+                        const editPanel = section.querySelector(".candidate-profile-section-edit");
+                        if (editPanel) {
+                            editPanel.hidden = true;
+                        }
+                        section.classList.remove("is-editing");
+                        toggle.setAttribute("aria-expanded", "false");
+                        return;
+                    }
+                    openSection(section);
+                });
+            }
+            if (cancel) {
+                cancel.addEventListener("click", () => {
+                    const editPanel = section.querySelector(".candidate-profile-section-edit");
+                    if (editPanel) {
+                        editPanel.hidden = true;
+                    }
+                    section.classList.remove("is-editing");
+                    if (toggle) {
+                        toggle.setAttribute("aria-expanded", "false");
+                    }
+                });
+            }
+        });
+
+        if (avatarMenuToggle && avatarMenu) {
+            avatarMenuToggle.addEventListener("click", () => {
+                const isOpen = avatarMenuToggle.getAttribute("aria-expanded") === "true";
+                syncAvatarMenuState();
+                avatarMenu.hidden = isOpen;
+                avatarMenuToggle.setAttribute("aria-expanded", String(!isOpen));
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!avatarMenuWrap || avatarMenu.hidden) {
+                    return;
+                }
+                if (!event.target.closest("[data-avatar-menu-wrap]")) {
+                    avatarMenu.hidden = true;
+                    avatarMenuToggle.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+
+        const previewFile = (input, callback) => {
+            const [file] = input.files || [];
+            if (!file) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => callback(event.target?.result || "");
+            reader.readAsDataURL(file);
+        };
+
+        if (coverPreview && coverUploadInput) {
+            coverUploadInput.addEventListener("change", () => {
+                previewFile(coverUploadInput, (result) => {
+                    if (!result) {
+                        return;
+                    }
+                    coverPreview.style.backgroundImage = "linear-gradient(135deg, rgba(79, 12, 40, 0.35), rgba(140, 41, 83, 0.28)), url('" + result + "')";
+                    coverPreview.style.backgroundSize = "cover";
+                    coverPreview.style.backgroundPosition = "center";
+                });
+            });
+        }
+
+        if (coverPreview && coverUploadInput && removeCoverPreviewButton) {
+            removeCoverPreviewButton.addEventListener("click", () => {
+                coverUploadInput.value = "";
+                coverPreview.style.backgroundImage = "";
+                coverPreview.style.backgroundSize = "";
+                coverPreview.style.backgroundPosition = "";
+            });
+        }
+
+        if (profilePictureInput) {
+            profilePictureInput.addEventListener("change", () => {
+                if (profilePictureClearInput) {
+                    profilePictureClearInput.checked = false;
+                }
+                if (avatarMenu && avatarMenuToggle) {
+                    avatarMenu.hidden = true;
+                    avatarMenuToggle.setAttribute("aria-expanded", "false");
+                }
+                previewFile(profilePictureInput, (result) => {
+                    if (!result) {
+                        return;
+                    }
+                    const currentAvatarImage = document.querySelector(".candidate-profile-header-avatar-image");
+                    const currentAvatarFallback = document.querySelector(".candidate-profile-header-avatar");
+                    if (currentAvatarImage) {
+                        currentAvatarImage.src = result;
+                        syncAvatarMenuState();
+                        return;
+                    }
+                    if (currentAvatarFallback) {
+                        const image = document.createElement("img");
+                        image.src = result;
+                        image.alt = "{{ candidate_display_name|escapejs }}";
+                        image.className = "candidate-profile-header-avatar-image";
+                        currentAvatarFallback.replaceWith(image);
+                        syncAvatarMenuState();
+                    }
+                });
+            });
+        }
+
+        if (removeProfilePictureButton && profilePictureClearInput && profileForm) {
+            removeProfilePictureButton.addEventListener("click", async () => {
+                profilePictureClearInput.checked = true;
+                if (profilePictureInput) {
+                    profilePictureInput.value = "";
+                }
+                if (avatarMenu && avatarMenuToggle) {
+                    avatarMenu.hidden = true;
+                    avatarMenuToggle.setAttribute("aria-expanded", "false");
+                }
+                const currentAvatarImage = document.querySelector(".candidate-profile-header-avatar-image");
+                const currentAvatarFallback = document.querySelector(".candidate-profile-header-avatar");
+                if (currentAvatarImage && profileAvatarWrap && !currentAvatarFallback) {
+                    const fallback = document.createElement("span");
+                    fallback.className = "candidate-profile-header-avatar";
+                    fallback.textContent = "{{ candidate_initials|escapejs }}";
+                    currentAvatarImage.replaceWith(fallback);
+                }
+                syncAvatarMenuState();
+                try {
+                    const formData = new FormData(profileForm);
+                    const response = await fetch(profileForm.action || window.location.href, {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        credentials: "same-origin",
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Profile picture removal failed");
+                    }
+
+                    const currentUrl = new URL(window.location.href);
+                    currentUrl.searchParams.set("saved", "1");
+                    window.history.replaceState({}, "", currentUrl.toString());
+                    ensureSavedAlert();
+                } catch (error) {
+                    if (profileRemoveSubmit) {
+                        profileRemoveSubmit.click();
+                    }
+                }
+            });
+        }
+
+        syncAvatarMenuState();
+
+        if (!certificationStack || !certificationTemplate) {
+            return;
+        }
+
+        certificationStack.addEventListener("click", (event) => {
+            const addButton = event.target.closest("[data-add-certification]");
+            if (addButton) {
+                const fragment = certificationTemplate.content.cloneNode(true);
+                certificationStack.appendChild(fragment);
+                return;
+            }
+
+            const removeButton = event.target.closest("[data-remove-certification]");
+            if (!removeButton) {
+                return;
+            }
+
+            const row = removeButton.closest(".candidate-upload-row");
+            if (row) {
+                row.remove();
+            }
+        });
+    })();
+</script>
+{% endblock %}

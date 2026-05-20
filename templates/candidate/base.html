@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Space | ManageraHub{% endblock %}
+
+{% block content %}
+<div class="candidate-shell-wrap">
+    <div class="candidate-shell">
+        <header class="candidate-topbar">
+            <div class="candidate-topbar-main">
+                <div class="candidate-topbar-left">
+                    <a href="{% url 'home' %}" class="candidate-brand-link" aria-label="Go to home page">
+                        <span class="brand-script">M</span>
+                        <span class="candidate-brand-name">ManageraHub Candidate</span>
+                    </a>
+                    <form method="get" action="{% url 'candidate_job_offers' %}" class="candidate-navbar-search" role="search">
+                        <span class="candidate-navbar-search-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M10.5 4a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13Zm0 2a4.5 4.5 0 1 0 0 9a4.5 4.5 0 0 0 0-9Zm5.15 10.74l4.1 4.1l-1.41 1.41l-4.1-4.1z" fill="currentColor"></path>
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            name="keyword"
+                            value="{% firstof filter_form.keyword.value request.GET.keyword '' %}"
+                            placeholder="Search jobs, companies, or keywords"
+                            aria-label="Search jobs, companies, or keywords"
+                            data-candidate-navbar-keyword
+                        >
+                    </form>
+                </div>
+                <nav class="candidate-topnav" aria-label="Candidate navigation">
+                    {% for item in candidate_nav_items %}
+                    <a href="{{ item.url }}" class="candidate-topnav-link{% if active_section == item.key %} is-active{% endif %}">{{ item.label }}</a>
+                    {% endfor %}
+                </nav>
+                <a href="{% url 'candidate_profile' %}" class="candidate-user-pill candidate-progress-pill" aria-label="Go to my profile">
+                    <span class="candidate-user-avatar">{{ candidate_initials }}</span>
+                    <div class="candidate-progress-pill-copy">
+                        <span class="candidate-user-label">Profile completion</span>
+                        <strong>{{ candidate_completion_percent }}% complete</strong>
+                        <span class="candidate-progress-pill-bar" aria-hidden="true">
+                            <span style="width: {{ candidate_completion_percent }}%;"></span>
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            {% if active_section == "jobs" and filter_form %}
+            <form method="get" class="candidate-topbar-filters" data-job-filters-form>
+                <input
+                    type="hidden"
+                    name="keyword"
+                    value="{% firstof filter_form.keyword.value request.GET.keyword '' %}"
+                    data-job-filter-control="keyword"
+                >
+                <div class="candidate-topbar-filters-grid">
+                    <details class="candidate-filter-pill">
+                        <summary>Location</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="jobs-location">Location</label>
+                            <input
+                                id="jobs-location"
+                                type="text"
+                                name="city"
+                                value="{{ filter_form.city.value|default_if_none:'' }}"
+                                placeholder="City or region"
+                                data-job-filter-control="location"
+                            >
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Job type</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.job_type.id_for_label }}">Job type</label>
+                            {{ filter_form.job_type }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Contract type</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.contract_type.id_for_label }}">Contract type</label>
+                            {{ filter_form.contract_type }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Remote / onsite / hybrid</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="jobs-work-mode">Remote / onsite / hybrid</label>
+                            <select id="jobs-work-mode" data-job-filter-control="work_mode">
+                                <option value="">All work modes</option>
+                                <option value="remote">Remote</option>
+                                <option value="onsite">Onsite</option>
+                                <option value="hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Date posted</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.date_posted.id_for_label }}">Date posted</label>
+                            {{ filter_form.date_posted }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Education level</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="jobs-education-level">Education level</label>
+                            <select id="jobs-education-level" data-job-filter-control="education_level">
+                                <option value="">All education levels</option>
+                                <option value="high_school">High School</option>
+                                <option value="bachelor">Bachelor</option>
+                                <option value="master">Master</option>
+                                <option value="phd">PhD</option>
+                                <option value="bootcamp">Bootcamp / Certification</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </details>
+                    <a href="{% url 'candidate_job_offers' %}" class="pill-button pill-button-dark candidate-filter-reset">Reset</a>
+                </div>
+            </form>
+            {% endif %}
+        </header>
+
+        <div class="candidate-layout">
+            <aside class="candidate-sidebar">
+                <div class="candidate-side-note">
+                    <p class="candidate-card-kicker">Candidate summary</p>
+                    <h3>{{ candidate_stats.applications }} application{{ candidate_stats.applications|pluralize }}</h3>
+                    <p>{{ candidate_stats.saved_docs }} private document{{ candidate_stats.saved_docs|pluralize }} saved and {{ candidate_stats.recent_jobs }} active job offer{{ candidate_stats.recent_jobs|pluralize }} available right now.</p>
+                </div>
+            </aside>
+
+            <main class="candidate-main">
+                {% block candidate_main %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,266 @@
+{% extends "candidate/base.html" %}
+
+{% block title %}Job Offers | ManageraHub{% endblock %}
+
+{% block candidate_main %}
+<section class="candidate-jobs-shell">
+    <section class="candidate-jobs-results-card">
+        <div class="candidate-jobs-results-head">
+            <div>
+                <p class="candidate-card-kicker">Available roles</p>
+                <h2>Active opportunities</h2>
+            </div>
+            <div class="candidate-jobs-results-meta">
+                <strong data-job-results-count>{{ jobs|length }}</strong>
+                <span>job{{ jobs|length|pluralize }} visible</span>
+            </div>
+        </div>
+
+        <div class="candidate-job-grid candidate-job-grid-linkedin" data-job-results-grid>
+            {% for job in jobs %}
+            <article
+                class="candidate-job-card candidate-job-card-linkedin"
+                data-job-card
+                data-title="{{ job.title|lower }}"
+                data-company="{{ job.company_name|lower }}"
+                data-location="{{ job.city|lower }} {{ job.country|lower }}"
+                data-city="{{ job.city|lower }}"
+                data-contract="{{ job.contract_type }}"
+                data-job-type="{{ job.job_type }}"
+                data-experience="{{ job.experience_level }}"
+                data-posted="{{ job.posted_at|date:'Y-m-d' }}"
+                data-work-mode="{% if job.is_remote %}remote{% else %}onsite{% endif %}"
+                data-summary="{{ job.summary|lower }}"
+                data-requirements="{{ job.requirements|lower }}"
+            >
+                <div class="candidate-job-card-top">
+                    <div>
+                        <p class="candidate-job-company">{{ job.company_name }}</p>
+                        <h3><a href="{% url 'candidate_job_detail' job.id %}">{{ job.title }}</a></h3>
+                    </div>
+                    <button type="button" class="candidate-job-save-button" data-job-save-button aria-pressed="false">Save</button>
+                </div>
+
+                <div class="candidate-job-location-row">
+                    <span>{{ job.city }}, {{ job.country }}</span>
+                    <span>{{ job.get_contract_type_display }}</span>
+                    <span>{% if job.is_remote %}Remote{% else %}Onsite{% endif %}</span>
+                </div>
+
+                <p class="candidate-job-summary">{{ job.summary|truncatewords:30 }}</p>
+
+                <div class="candidate-job-tags">
+                    <span>{{ job.get_job_type_display }}</span>
+                    <span>{{ job.get_experience_level_display }}</span>
+                    <span>{{ job.get_contract_type_display }}</span>
+                </div>
+
+                <div class="candidate-job-footer">
+                    <div class="candidate-job-posted">
+                        <strong>Posted</strong>
+                        <span>{{ job.posted_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="candidate-card-actions">
+                        <a href="{% url 'candidate_job_detail' job.id %}" class="pill-button pill-button-light">Details</a>
+                        <a href="{% url 'candidate_job_apply' job.id %}" class="pill-button pill-button-dark">Apply</a>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <article class="candidate-placeholder-card">
+                <h3>No job offers match your search.</h3>
+                <p>Try removing one or more filters to see more opportunities.</p>
+            </article>
+            {% endfor %}
+        </div>
+
+        <article class="candidate-placeholder-card candidate-job-empty-state" data-job-empty-state hidden>
+            <h3>No job offers match these filters.</h3>
+            <p>Adjust one or more search inputs to reveal more opportunities.</p>
+        </article>
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (() => {
+        const form = document.querySelector("[data-job-filters-form]");
+        const navbarKeyword = document.querySelector("[data-candidate-navbar-keyword]");
+        const grid = document.querySelector("[data-job-results-grid]");
+        const cards = Array.from(document.querySelectorAll("[data-job-card]"));
+        const countNode = document.querySelector("[data-job-results-count]");
+        const emptyState = document.querySelector("[data-job-empty-state]");
+        if (!form || !grid || !cards.length || !navbarKeyword) {
+            return;
+        }
+
+        const controls = {
+            keyword: form.querySelector("[data-job-filter-control='keyword']"),
+            location: form.querySelector("[data-job-filter-control='location']"),
+            regionCity: form.querySelector("[data-job-filter-control='region_city']"),
+            workMode: form.querySelector("[data-job-filter-control='work_mode']"),
+            jobType: form.querySelector("#{{ filter_form.job_type.id_for_label }}"),
+            contractType: form.querySelector("#{{ filter_form.contract_type.id_for_label }}"),
+            experienceLevel: form.querySelector("#{{ filter_form.experience_level.id_for_label }}"),
+            datePosted: form.querySelector("#{{ filter_form.date_posted.id_for_label }}"),
+            educationLevel: form.querySelector("[data-job-filter-control='education_level']"),
+        };
+
+        const normalize = (value) => (value || "").toString().trim().toLowerCase();
+        const today = new Date();
+
+        const deriveWorkMode = (card) => {
+            const workMode = normalize(card.dataset.workMode);
+            const haystack = normalize(card.dataset.summary + " " + card.dataset.requirements);
+            if (haystack.includes("hybrid")) {
+                return "hybrid";
+            }
+            return workMode || "onsite";
+        };
+
+        const deriveEducationLevel = (card) => {
+            const haystack = normalize(card.dataset.summary + " " + card.dataset.requirements);
+            if (haystack.includes("phd")) {
+                return "phd";
+            }
+            if (haystack.includes("master")) {
+                return "master";
+            }
+            if (haystack.includes("bachelor")) {
+                return "bachelor";
+            }
+            if (haystack.includes("high school")) {
+                return "high_school";
+            }
+            if (haystack.includes("bootcamp") || haystack.includes("certification")) {
+                return "bootcamp";
+            }
+            return "";
+        };
+
+        const regionOptions = Array.from(
+            new Set(cards.map((card) => card.dataset.city).filter(Boolean))
+        ).sort((a, b) => a.localeCompare(b));
+
+        if (controls.regionCity && regionOptions.length) {
+            regionOptions.forEach((city) => {
+                const option = document.createElement("option");
+                option.value = city;
+                option.textContent = city.replace(/\b\w/g, (char) => char.toUpperCase());
+                controls.regionCity.appendChild(option);
+            });
+        }
+
+        const updateVisibleCards = () => {
+            if (controls.keyword) {
+                controls.keyword.value = navbarKeyword.value;
+            }
+
+            const keywordValue = normalize(navbarKeyword.value);
+            const locationValue = normalize(controls.location && controls.location.value);
+            const regionCityValue = normalize(controls.regionCity && controls.regionCity.value);
+            const workModeValue = normalize(controls.workMode && controls.workMode.value);
+            const jobTypeValue = normalize(controls.jobType && controls.jobType.value);
+            const contractTypeValue = normalize(controls.contractType && controls.contractType.value);
+            const experienceLevelValue = normalize(controls.experienceLevel && controls.experienceLevel.value);
+            const datePostedValue = normalize(controls.datePosted && controls.datePosted.value);
+            const educationLevelValue = normalize(controls.educationLevel && controls.educationLevel.value);
+
+            let visibleCount = 0;
+
+            cards.forEach((card) => {
+                const title = normalize(card.dataset.title);
+                const company = normalize(card.dataset.company);
+                const location = normalize(card.dataset.location);
+                const city = normalize(card.dataset.city);
+                const summary = normalize(card.dataset.summary);
+                const requirements = normalize(card.dataset.requirements);
+                const workMode = deriveWorkMode(card);
+                const educationLevel = deriveEducationLevel(card);
+                const posted = card.dataset.posted ? new Date(card.dataset.posted) : null;
+
+                const matchesKeyword = !keywordValue || [title, company, summary, requirements].some((value) => value.includes(keywordValue));
+                const matchesLocation = !locationValue || location.includes(locationValue) || city.includes(locationValue);
+                const matchesRegionCity = !regionCityValue || city.includes(regionCityValue) || location.includes(regionCityValue);
+                const matchesWorkMode = !workModeValue || workMode === workModeValue;
+                const matchesJobType = !jobTypeValue || normalize(card.dataset.jobType) === jobTypeValue;
+                const matchesContract = !contractTypeValue || normalize(card.dataset.contract) === contractTypeValue;
+                const matchesExperience = !experienceLevelValue || normalize(card.dataset.experience) === experienceLevelValue;
+                const matchesEducation = !educationLevelValue || educationLevel === educationLevelValue;
+
+                let matchesDatePosted = true;
+                if (datePostedValue && posted instanceof Date && !Number.isNaN(posted.valueOf())) {
+                    const days = parseInt(datePostedValue, 10);
+                    const threshold = new Date(today);
+                    threshold.setDate(today.getDate() - days);
+                    matchesDatePosted = posted >= threshold;
+                }
+
+                const isVisible = matchesKeyword
+                    && matchesLocation
+                    && matchesRegionCity
+                    && matchesWorkMode
+                    && matchesJobType
+                    && matchesContract
+                    && matchesExperience
+                    && matchesEducation
+                    && matchesDatePosted;
+
+                card.hidden = !isVisible;
+                if (isVisible) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (countNode) {
+                countNode.textContent = String(visibleCount);
+            }
+            if (emptyState) {
+                emptyState.hidden = visibleCount !== 0;
+            }
+        };
+
+        form.addEventListener("input", updateVisibleCards);
+        form.addEventListener("change", updateVisibleCards);
+        navbarKeyword.addEventListener("input", updateVisibleCards);
+        form.addEventListener("submit", () => {
+            if (controls.keyword) {
+                controls.keyword.value = navbarKeyword.value;
+            }
+        });
+
+        form.querySelectorAll(".candidate-filter-pill").forEach((pill) => {
+            pill.addEventListener("toggle", () => {
+                if (!pill.open) {
+                    return;
+                }
+                form.querySelectorAll(".candidate-filter-pill").forEach((otherPill) => {
+                    if (otherPill !== pill) {
+                        otherPill.open = false;
+                    }
+                });
+            });
+        });
+
+        grid.querySelectorAll("[data-job-save-button]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const isSaved = button.getAttribute("aria-pressed") === "true";
+                button.setAttribute("aria-pressed", String(!isSaved));
+                button.textContent = isSaved ? "Save" : "Saved";
+            });
+        });
+
+        form.querySelectorAll("select, input").forEach((control) => {
+            control.addEventListener("change", () => {
+                const pill = control.closest(".candidate-filter-pill");
+                if (pill && pill.open) {
+                    pill.open = false;
+                }
+            });
+        });
+
+        updateVisibleCards();
+    })();
+</script>
+{% endblock %}
