@@ -1,0 +1,45 @@
+{% extends "company/base.html" %}
+
+{% block title %}My Jobs | ManageraHub{% endblock %}
+
+{% block company_main %}
+<section class="candidate-hero-card" style="padding:28px 30px 24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+            <p class="candidate-card-kicker" style="color:rgba(255,255,255,.7)">Job Management</p>
+            <h1 style="margin:4px 0 0;font-size:1.5rem;">My Jobs</h1>
+        </div>
+        <a href="{% url 'company_post_job' %}" class="pill-button" style="background:#fff;border-color:#fff;color:#5a5d4a;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.08);">+ Post a Job</a>
+    </div>
+</section>
+
+{% for job in jobs %}
+<section class="candidate-profile-section-card" style="margin-bottom:10px;">
+    <div class="candidate-profile-section-head">
+        <div>
+            <h3 style="margin:0;">{{ job.title }}</h3>
+            <p style="margin:2px 0 0;">{{ job.city }}, {{ job.country }} · {{ job.get_contract_type_display }} · {{ job.get_experience_level_display }} · {{ job.applications.count }} application{{ job.applications.count|pluralize }}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            {% if job.is_active %}
+            <span style="display:inline-flex;padding:4px 12px;border-radius:999px;font-size:.72rem;font-weight:700;background:#e8f5e9;color:#2e7d32;">Active</span>
+            {% else %}
+            <span style="display:inline-flex;padding:4px 12px;border-radius:999px;font-size:.72rem;font-weight:700;background:rgba(90,93,74,.08);color:#8c907d;">Inactive</span>
+            {% endif %}
+            <a href="{% url 'company_job_edit' job.id %}" class="pill-button pill-button-light" style="min-height:32px;padding:0 14px;font-size:.74rem;">Edit</a>
+            <a href="{% url 'company_job_toggle' job.id %}" class="pill-button pill-button-light" style="min-height:32px;padding:0 14px;font-size:.74rem;">{% if job.is_active %}Deactivate{% else %}Activate{% endif %}</a>
+            <form method="post" action="{% url 'company_job_delete' job.id %}" style="display:inline" onsubmit="return confirm('Delete this job?')">
+                {% csrf_token %}
+                <button type="submit" class="pill-button pill-button-light" style="min-height:32px;padding:0 14px;font-size:.74rem;color:#c62828;border-color:rgba(198,40,40,.2);">Delete</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% empty %}
+<div class="candidate-placeholder-card">
+    <h3>No jobs posted yet</h3>
+    <p>Post your first job to start receiving applications from qualified candidates.</p>
+    <a href="{% url 'company_post_job' %}" class="pill-button pill-button-dark" style="margin-top:12px;display:inline-flex;">Post your first job</a>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Company Space | ManageraHub{% endblock %}
+
+{% block content %}
+<style>
+    /* === Company theme — only color overrides, structure stays identical to candidate === */
+
+    /* Page background */
+    .company-theme.candidate-shell-wrap { background: #f4f5f0; }
+
+    /* Topbar — override the OUTER container colors, NOT the inner -main */
+    .company-theme .candidate-topbar {
+        background: rgba(244,245,240,0.58);
+        border-color: rgba(255,255,255,0.5);
+        box-shadow: 0 10px 26px rgba(90,93,74,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+
+    /* Brand */
+    .company-theme .candidate-brand-name { color: #5a5d4a; }
+    .company-theme .brand-script { color: #5a5d4a; }
+
+    /* Nav links — keep exact same sizing, only swap colors */
+    .company-theme .candidate-topnav-link { color: #5a5d4a; }
+    .company-theme .candidate-topnav-link:hover,
+    .company-theme .candidate-topnav-link:focus-visible,
+    .company-theme .candidate-topnav-link.is-active {
+        color: #3a3d2e;
+        border-color: rgba(90,93,74,0.35);
+        box-shadow: 0 2px 8px rgba(90,93,74,0.08);
+    }
+
+    /* Search bar focus ring */
+    .company-theme .candidate-navbar-search:focus-within {
+        border-color: rgba(90,93,74,0.28);
+        box-shadow: 0 0 0 3px rgba(90,93,74,0.08);
+    }
+    .company-theme .candidate-navbar-search-icon { color: rgba(90,93,74,0.62); }
+    .company-theme .candidate-navbar-search input { color: #3a3d2e; }
+    .company-theme .candidate-navbar-search input::placeholder { color: rgba(90,93,74,0.65); }
+
+    /* User pill / progress */
+    .company-theme .candidate-user-avatar { background: linear-gradient(145deg, #5a5d4a, #8c907d); color: #fff; }
+    .company-theme .candidate-user-label { color: #6b6e5c; }
+    .company-theme .candidate-user-pill strong,
+    .company-theme .candidate-progress-pill-copy strong { color: #3a3d2e; }
+    .company-theme .candidate-progress-pill-bar { background: rgba(90,93,74,0.1); }
+    .company-theme .candidate-progress-pill-bar span { background: linear-gradient(90deg,#5a5d4a,#a8d5a2); }
+
+    /* Sidebar */
+    .company-theme .candidate-side-note { border-color: rgba(90,93,74,0.1); box-shadow: 0 4px 16px rgba(90,93,74,0.06); }
+    .company-theme .candidate-side-note h3 { color: #3a3d2e; }
+    .company-theme .candidate-side-note p { color: #5a5d4a; }
+    .company-theme .candidate-card-kicker { color: #6b6e5c; }
+
+    /* Buttons */
+    .company-theme .pill-button-dark { background: #5a5d4a; border-color: #5a5d4a; color: #fff; }
+    .company-theme .pill-button-dark:hover { background: #4a4d3c; border-color: #4a4d3c; }
+    .company-theme .pill-button-light { color: #4a4d3c; border-color: rgba(90,93,74,0.22); }
+    .company-theme .pill-button-light:hover { background: rgba(90,93,74,0.08); }
+
+    /* Profile cover & header */
+    .company-theme .candidate-profile-cover { background: linear-gradient(135deg,rgba(90,93,74,0.45),rgba(140,144,125,0.35)),linear-gradient(160deg,#5a5d4a,#8c907d 50%,#a8d5a2); }
+    .company-theme .candidate-profile-header-card { border-color: rgba(90,93,74,0.08); }
+    .company-theme .candidate-profile-header-card h1 { color: #2b2b25; }
+    .company-theme .candidate-profile-header-headline { color: #4a4d3c; }
+    .company-theme .candidate-profile-header-location { color: #5a5d4a; }
+    .company-theme .candidate-inline-link { color: #4a4d3c; font-weight: 600; }
+    .company-theme .candidate-profile-side-item strong { color: #3a3d2e; }
+    .company-theme .candidate-profile-side-item span { color: #5a5d4a; }
+    .company-theme .candidate-profile-side-progress span { background: linear-gradient(90deg,#8c907d,#a8d5a2); }
+
+    /* Profile sections */
+    .company-theme .candidate-profile-section-card { border-color: rgba(90,93,74,0.08); }
+    .company-theme .candidate-profile-section-card:hover { border-color: rgba(90,93,74,0.15); }
+    .company-theme .candidate-profile-section-head h2,
+    .company-theme .candidate-profile-section-head h3 { color: #2b2b25; }
+    .company-theme .candidate-profile-section-head p { color: #5a5d4a; }
+    .company-theme .candidate-profile-section-icon { color: #6b6e5c; }
+    .company-theme .candidate-profile-section-icon:hover { background: rgba(90,93,74,0.1); color: #3a3d2e; }
+    .company-theme .candidate-profile-editor-card { border-color: rgba(90,93,74,0.1); box-shadow: 0 4px 14px rgba(90,93,74,0.06); }
+    .company-theme .candidate-profile-editor-card h2 { color: #2b2b25; }
+    .company-theme .candidate-profile-editor-card p { color: #5a5d4a; }
+    .company-theme .candidate-profile-view-title { color: #2b2b25; }
+    .company-theme .candidate-profile-view-copy { color: #4a4d3c; }
+    .company-theme .candidate-profile-entry strong { color: #2b2b25; }
+    .company-theme .candidate-profile-entry span { color: #5a5d4a; }
+    .company-theme .candidate-profile-inline-list span { color: #4a4d3c; }
+    .company-theme .candidate-profile-bio-content p { color: #3a3d2e; }
+
+    /* Forms */
+    .company-theme .candidate-form-field label { color: #3a3d2e; }
+    .company-theme .candidate-form-field input,
+    .company-theme .candidate-form-field select,
+    .company-theme .candidate-form-field textarea { color: #2b2b25; }
+    .company-theme .candidate-form-field input:focus,
+    .company-theme .candidate-form-field select:focus,
+    .company-theme .candidate-form-field textarea:focus { border-color: #8c907d; box-shadow: 0 0 0 3px rgba(140,144,125,0.15); }
+
+    /* Alerts */
+    .company-theme .candidate-alert-success { background: #e8f5e9; color: #2e7d32; border-color: rgba(46,125,50,0.15); }
+
+    /* Hero / dashboard cards */
+    .company-theme .candidate-hero-card { background: linear-gradient(135deg,#5a5d4a 0%,#8c907d 60%,#a8d5a2 100%); }
+    .company-theme .candidate-hero-card h1 { color: #fff; }
+    .company-theme .candidate-hero-card p { color: rgba(255,255,255,0.85); }
+    .company-theme .candidate-hero-card .candidate-card-kicker { color: rgba(255,255,255,0.7); }
+    .company-theme .candidate-stat-card { border-color: rgba(90,93,74,0.08); }
+    .company-theme .candidate-stat-card strong { color: #3a3d2e; }
+    .company-theme .candidate-stat-card span { color: #5a5d4a; }
+
+    /* Panel cards */
+    .company-theme .candidate-panel-card { border-color: rgba(90,93,74,0.08); box-shadow: 0 4px 14px rgba(90,93,74,0.06); }
+    .company-theme .candidate-panel-card h2 { color: #2b2b25; }
+    .company-theme .candidate-panel-card p { color: #5a5d4a; }
+    .company-theme .candidate-list-item { color: #3a3d2e; border-color: rgba(90,93,74,0.06); }
+    .company-theme .candidate-list-item span { color: #3a3d2e; }
+    .company-theme .candidate-list-item a { color: #4a4d3c; }
+    .company-theme .candidate-mini-entry strong { color: #2b2b25; }
+    .company-theme .candidate-mini-entry span { color: #5a5d4a; }
+    .company-theme .candidate-placeholder-card { border-color: rgba(90,93,74,0.15); }
+    .company-theme .candidate-placeholder-card h3 { color: #3a3d2e; }
+    .company-theme .candidate-placeholder-card p { color: #5a5d4a; }
+
+    /* Profile avatar */
+    .company-theme .candidate-profile-cover-action { background: rgba(90,93,74,0.6); }
+    .company-theme .candidate-profile-cover-action:hover { background: rgba(90,93,74,0.85); }
+    .company-theme .candidate-profile-avatar-edit { background: #5a5d4a; }
+    .company-theme .candidate-profile-header-avatar { background: linear-gradient(145deg, #5a5d4a, #8c907d); color: #fff; }
+
+    /* Filter pills */
+    .company-theme .candidate-filter-pill summary { color: #5a5d4a; border-color: rgba(90,93,74,0.18); }
+    .company-theme .candidate-filter-pill summary:hover { border-color: rgba(90,93,74,0.35); color: #3a3d2e; }
+    .company-theme .candidate-filter-pill[open] summary { border-color: rgba(90,93,74,0.35); color: #3a3d2e; }
+    .company-theme .candidate-filter-panel { border-color: rgba(90,93,74,0.12); }
+    .company-theme .candidate-filter-panel label { color: #5a5d4a; }
+    .company-theme .candidate-filter-panel select,
+    .company-theme .candidate-filter-panel input { color: #2b2b25; border-color: rgba(90,93,74,0.18); }
+    .company-theme .candidate-filter-panel select:focus,
+    .company-theme .candidate-filter-panel input:focus { border-color: #8c907d; box-shadow: 0 0 0 3px rgba(140,144,125,0.12); }
+</style>
+
+<div class="candidate-shell-wrap company-theme">
+    <div class="candidate-shell">
+        <header class="candidate-topbar">
+            <div class="candidate-topbar-main">
+                <div class="candidate-topbar-left">
+                    <a href="{% url 'home' %}" class="candidate-brand-link" aria-label="Go to home page">
+                        <span class="brand-script">M</span>
+                        <span class="candidate-brand-name">ManageraHub Company</span>
+                    </a>
+                    <form method="get" action="{% url 'company_jobs' %}" class="candidate-navbar-search" role="search">
+                        <span class="candidate-navbar-search-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M10.5 4a6.5 6.5 0 1 1 0 13a6.5 6.5 0 0 1 0-13Zm0 2a4.5 4.5 0 1 0 0 9a4.5 4.5 0 0 0 0-9Zm5.15 10.74l4.1 4.1l-1.41 1.41l-4.1-4.1z" fill="currentColor"></path>
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            name="keyword"
+                            placeholder="Search jobs, companies, or keywords"
+                            aria-label="Search jobs, companies, or keywords"
+                        >
+                    </form>
+                </div>
+                <nav class="candidate-topnav" aria-label="Company navigation">
+                    {% for item in company_nav_items %}
+                    <a href="{{ item.url }}" class="candidate-topnav-link{% if active_section == item.key %} is-active{% endif %}">{{ item.label }}</a>
+                    {% endfor %}
+                </nav>
+                <a href="{% url 'company_profile' %}" class="candidate-user-pill candidate-progress-pill" aria-label="Go to company profile">
+                    <span class="candidate-user-avatar">{{ company_initials }}</span>
+                    <div class="candidate-progress-pill-copy">
+                        <span class="candidate-user-label">Profile completion</span>
+                        <strong>{{ company_profile.completion_percent }}% complete</strong>
+                        <span class="candidate-progress-pill-bar" aria-hidden="true">
+                            <span style="width: {{ company_profile.completion_percent }}%;"></span>
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            {% if active_section == "jobs" and filter_form %}
+            <form method="get" class="candidate-topbar-filters" data-job-filters-form>
+                <input
+                    type="hidden"
+                    name="keyword"
+                    value="{% firstof filter_form.keyword.value request.GET.keyword '' %}"
+                    data-job-filter-control="keyword"
+                >
+                <div class="candidate-topbar-filters-grid">
+                    <details class="candidate-filter-pill">
+                        <summary>Job type</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.job_type.id_for_label }}">Job type</label>
+                            {{ filter_form.job_type }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Contract type</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.contract_type.id_for_label }}">Contract type</label>
+                            {{ filter_form.contract_type }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Experience level</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.experience_level.id_for_label }}">Experience level</label>
+                            {{ filter_form.experience_level }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Status</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.status.id_for_label }}">Status</label>
+                            {{ filter_form.status }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Date posted</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.date_posted.id_for_label }}">Date posted</label>
+                            {{ filter_form.date_posted }}
+                        </div>
+                    </details>
+                    <a href="{% url 'company_jobs' %}" class="pill-button pill-button-dark candidate-filter-reset">Reset</a>
+                </div>
+            </form>
+            {% endif %}
+
+            {% if active_section == "applications" and filter_form %}
+            <form method="get" class="candidate-topbar-filters" data-app-filters-form>
+                <input
+                    type="hidden"
+                    name="keyword"
+                    value="{% firstof filter_form.keyword.value request.GET.keyword '' %}"
+                    data-job-filter-control="keyword"
+                >
+                <div class="candidate-topbar-filters-grid">
+                    <details class="candidate-filter-pill">
+                        <summary>Status</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.status.id_for_label }}">Status</label>
+                            {{ filter_form.status }}
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Job title</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="filter-job-title">Job title</label>
+                            <input
+                                id="filter-job-title"
+                                type="text"
+                                name="job_title"
+                                value="{{ filter_form.job_title.value|default_if_none:'' }}"
+                                placeholder="Search by job title"
+                            >
+                        </div>
+                    </details>
+                    <details class="candidate-filter-pill">
+                        <summary>Date received</summary>
+                        <div class="candidate-filter-panel">
+                            <label for="{{ filter_form.date_received.id_for_label }}">Date received</label>
+                            {{ filter_form.date_received }}
+                        </div>
+                    </details>
+                    <a href="{% url 'company_applications' %}" class="pill-button pill-button-dark candidate-filter-reset">Reset</a>
+                </div>
+            </form>
+            {% endif %}
+        </header>
+
+        <div class="candidate-layout">
+            <aside class="candidate-sidebar">
+                <div class="candidate-side-note">
+                    <p class="candidate-card-kicker">Company summary</p>
+                    <h3>{{ company_stats.posted_jobs }} job{{ company_stats.posted_jobs|pluralize }} posted</h3>
+                    <p>{{ company_stats.total_applications }} application{{ company_stats.total_applications|pluralize }} received and {{ company_stats.pending_applications }} pending review.</p>
+                </div>
+            </aside>
+
+            <main class="candidate-main">
+                {% block company_main %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</div>
+{% endblock %}

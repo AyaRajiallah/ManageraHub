@@ -1,0 +1,111 @@
+{% extends "company/base.html" %}
+{% load static %}
+
+{% block title %}{{ application.full_name }} — Application | ManageraHub{% endblock %}
+
+{% block company_main %}
+<style>
+    .co-status-badge{display:inline-flex;padding:5px 14px;border-radius:999px;font-size:.74rem;font-weight:700}
+    .co-status-sent{background:#e3f2fd;color:#1565c0}
+    .co-status-under_review{background:#fff3e0;color:#e65100}
+    .co-status-accepted{background:#e8f5e9;color:#2e7d32}
+    .co-status-rejected{background:#fce4ec;color:#c62828}
+    .co-status-interview_scheduled{background:#f3e5f5;color:#7b1fa2}
+    .co-status-btn{display:inline-flex;align-items:center;padding:9px 18px;border-radius:999px;font-size:.78rem;font-weight:700;border:2px solid transparent;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .15s}
+    .co-status-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+    .co-status-btn[value="sent"]{background:#e3f2fd;color:#1565c0;border-color:#bbdefb}
+    .co-status-btn[value="under_review"]{background:#fff3e0;color:#e65100;border-color:#ffe0b2}
+    .co-status-btn[value="interview_scheduled"]{background:#f3e5f5;color:#7b1fa2;border-color:#e1bee7}
+    .co-status-btn[value="accepted"]{background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9}
+    .co-status-btn[value="rejected"]{background:#fce4ec;color:#c62828;border-color:#f8bbd0}
+    .co-status-btn.is-current{box-shadow:0 0 0 3px rgba(90,93,74,.2);transform:scale(1.05)}
+</style>
+
+<a href="{% url 'company_applications' %}" class="candidate-inline-link" style="margin-bottom:16px;display:inline-flex;">← Back to applications</a>
+
+<section class="candidate-profile-header-card">
+    <div class="candidate-profile-cover" style="min-height:80px;"></div>
+    <div class="candidate-profile-header-body">
+        <div class="candidate-profile-header-main">
+            <div class="candidate-profile-header-avatar-wrap">
+                <span class="candidate-profile-header-avatar">{{ application.full_name|make_list|first|upper }}</span>
+            </div>
+            <div class="candidate-profile-header-copy">
+                <div class="candidate-profile-header-title-row">
+                    <div>
+                        <h1>{{ application.full_name }}</h1>
+                        <p class="candidate-profile-header-headline">Applied for <strong>{{ application.job_offer.title }}</strong></p>
+                        <p class="candidate-profile-header-location">
+                            {{ application.email }}
+                            {% if application.phone_number %} · {{ application.phone_number }}{% endif %}
+                            · {{ application.submitted_at|date:"F d, Y" }}
+                        </p>
+                    </div>
+                    <span class="co-status-badge co-status-{{ application.status }}">{{ application.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if application.application_text %}
+<section class="candidate-profile-section-card">
+    <div class="candidate-profile-section-head">
+        <div>
+            <h3>Application message</h3>
+        </div>
+    </div>
+    <div class="candidate-profile-section-view candidate-profile-bio-content">
+        <p>{{ application.application_text }}</p>
+    </div>
+</section>
+{% endif %}
+
+<section class="candidate-profile-section-card">
+    <div class="candidate-profile-section-head">
+        <div>
+            <h3>Documents</h3>
+            <p>CV and cover letter attached to this application.</p>
+        </div>
+    </div>
+    <div class="candidate-profile-section-view">
+        <div class="candidate-profile-entry-list">
+            <div class="candidate-profile-entry">
+                <strong>CV</strong>
+                <span>
+                    {% if application.cv_file %}
+                    <a href="{{ application.cv_file.url }}" class="candidate-inline-link" target="_blank">Download CV</a>
+                    {% else %}No CV attached{% endif %}
+                </span>
+            </div>
+            <div class="candidate-profile-entry">
+                <strong>Cover letter</strong>
+                <span>
+                    {% if application.cover_letter_file %}
+                    <a href="{{ application.cover_letter_file.url }}" class="candidate-inline-link" target="_blank">Download cover letter</a>
+                    {% else %}No cover letter attached{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="candidate-profile-editor-card candidate-panel-card candidate-panel-card-wide">
+    <div class="candidate-profile-editor-head">
+        <div>
+            <p class="candidate-card-kicker">Status management</p>
+            <h2>Update application status</h2>
+        </div>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            {% for value, label in status_choices %}
+            <button type="submit" name="status" value="{{ value }}" class="co-status-btn{% if application.status == value %} is-current{% endif %}">
+                {{ label }}
+            </button>
+            {% endfor %}
+        </div>
+    </form>
+</section>
+{% endblock %}

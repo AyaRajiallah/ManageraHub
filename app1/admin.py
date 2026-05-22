@@ -40,11 +40,13 @@ original_index = admin.site.index
 def custom_index(request, extra_context=None):
     if extra_context is None:
         extra_context = {}
+    pending_companies = CompanyProfile.objects.filter(is_approved=False).select_related('user')
     extra_context.update({
         'user_count': User.objects.count(),
         'admin_count': User.objects.filter(is_staff=True).count(),
         'active_count': User.objects.filter(is_active=True).count(),
-        'activity_count': LogEntry.objects.count(),
+        'pending_count': pending_companies.count(),
+        'pending_companies': list(pending_companies.order_by('-created_at')),
         'recent_users': list(User.objects.order_by('-date_joined')[:5]),
     })
     return original_index(request, extra_context)
@@ -67,8 +69,21 @@ class CandidateProfileAdmin(admin.ModelAdmin):
 
 @admin.register(CompanyProfile)
 class CompanyProfileAdmin(admin.ModelAdmin):
-    list_display = ("company_name", "phone_number", "city", "country", "updated_at")
-    search_fields = ("company_name", "user__username", "city")
+    list_display = ("company_name", "industry", "company_size", "city", "country", "is_approved", "created_at")
+    search_fields = ("company_name", "user__username", "user__email", "city", "industry")
+    list_filter = ("is_approved", "industry", "company_size", "country")
+    list_editable = ("is_approved",)
+    actions = ["approve_companies", "reject_companies"]
+
+    @admin.action(description="✅ Approve selected companies")
+    def approve_companies(self, request, queryset):
+        updated = queryset.update(is_approved=True)
+        self.message_user(request, f"{updated} company(ies) approved.")
+
+    @admin.action(description="❌ Reject selected companies")
+    def reject_companies(self, request, queryset):
+        updated = queryset.update(is_approved=False)
+        self.message_user(request, f"{updated} company(ies) rejected.")
 
 
 @admin.register(JobOffer)

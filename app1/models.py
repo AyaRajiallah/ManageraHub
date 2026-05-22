@@ -89,6 +89,10 @@ class CandidateCertification(models.Model):
         return self.file.name.rsplit("/", 1)[-1]
 
 
+def company_profile_file_path(instance, filename):
+    return f"company_profiles/user_{instance.user_id}/{filename}"
+
+
 class CompanyProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -96,9 +100,16 @@ class CompanyProfile(models.Model):
         related_name="company_profile",
     )
     company_name = models.CharField(max_length=180, blank=True)
+    industry = models.CharField(max_length=120, blank=True)
+    company_size = models.CharField(max_length=60, blank=True)
     phone_number = models.CharField(max_length=40, blank=True)
     city = models.CharField(max_length=120, blank=True)
     country = models.CharField(max_length=120, blank=True)
+    website = models.URLField(max_length=300, blank=True)
+    description = models.TextField(blank=True)
+    logo = models.ImageField(upload_to=company_profile_file_path, blank=True)
+    background_image = models.ImageField(upload_to=company_profile_file_path, blank=True)
+    is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -108,22 +119,42 @@ class CompanyProfile(models.Model):
     def __str__(self):
         return self.company_name or self.user.get_full_name().strip() or self.user.username
 
+    @property
+    def display_name(self):
+        return self.company_name or self.user.get_full_name().strip() or self.user.username
+
+    @property
+    def completion_percent(self):
+        fields = [
+            bool(self.company_name.strip()),
+            bool(self.industry.strip()),
+            bool(self.company_size.strip()),
+            bool(self.phone_number.strip()),
+            bool(self.city.strip() or self.country.strip()),
+            bool(self.website),
+            bool(self.description.strip()),
+            bool(self.logo),
+        ]
+        return int((sum(fields) / len(fields)) * 100)
+
 
 class JobOffer(models.Model):
     JOB_TYPE_CHOICES = [
-        ("engineering", "Engineering"),
-        ("marketing", "Marketing"),
-        ("design", "Design"),
-        ("sales", "Sales"),
-        ("operations", "Operations"),
-        ("data", "Data"),
+        ("full_time", "Full-time"),
+        ("part_time", "Part-time"),
+        ("internship", "Internship / Stage"),
+        ("alternance", "Alternance / Apprentissage"),
+        ("freelance", "Freelance / Mission"),
+        ("shift", "Shift Work"),
     ]
     CONTRACT_TYPE_CHOICES = [
-        ("full_time", "Full Time"),
-        ("part_time", "Part Time"),
-        ("internship", "Internship"),
-        ("contract", "Contract"),
-        ("freelance", "Freelance"),
+        ("cdi", "CDI (Permanent)"),
+        ("cdd", "CDD (Fixed-term)"),
+        ("anapec", "ANAPEC (Insertion)"),
+        ("stage_pre", "Stage Pré-embauche"),
+        ("stage_obs", "Stage d'observation"),
+        ("freelance", "Freelance / Auto-entrepreneur"),
+        ("ctt", "CTT (Interim)"),
     ]
     EXPERIENCE_LEVEL_CHOICES = [
         ("junior", "Junior"),

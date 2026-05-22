@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Approval | ManageraHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700&family=Great+Vibes&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --plum: #4F0C28;
+            --sage: #8c907d;
+            --sage-deep: #6f7363;
+            --text-main: #2b2230;
+            --text-soft: #6b6171;
+            --radius-pill: 999px;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; }
+        body {
+            font-family: "Montserrat", sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url("{% static 'images/service-company.jpeg' %}") center center / cover no-repeat fixed;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(18, 22, 16, 0.68);
+            backdrop-filter: blur(20px) saturate(1.3);
+            -webkit-backdrop-filter: blur(20px) saturate(1.3);
+            z-index: 0;
+        }
+
+        .pending-card {
+            position: relative;
+            z-index: 1;
+            width: min(92%, 560px);
+            padding: 52px 44px 48px;
+            background: rgba(255, 255, 255, 0.09);
+            backdrop-filter: blur(30px) saturate(1.5);
+            -webkit-backdrop-filter: blur(30px) saturate(1.5);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 28px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            text-align: center;
+            color: #fff;
+        }
+        .pending-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 180px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .pending-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 28px;
+            border-radius: 50%;
+            background: rgba(168, 213, 162, 0.12);
+            border: 1px solid rgba(168, 213, 162, 0.25);
+        }
+        .pending-icon svg {
+            width: 42px;
+            height: 42px;
+            color: #a8d5a2;
+        }
+
+        .pending-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+        .brand-script { font-family: "Great Vibes", cursive; font-size: 1.8rem; color: #fff; line-height: 1; }
+        .brand-name { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+
+        .pending-kicker {
+            font-size: 0.67rem;
+            font-weight: 600;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #a8d5a2;
+            margin-bottom: 10px;
+        }
+
+        .pending-title {
+            margin: 0 0 16px;
+            font-family: "Bodoni Moda", Georgia, serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1;
+            color: #fff;
+        }
+
+        .pending-desc {
+            max-width: 400px;
+            margin: 0 auto 28px;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .pending-steps {
+            display: grid;
+            gap: 12px;
+            max-width: 380px;
+            margin: 0 auto 32px;
+            text-align: left;
+        }
+        .pending-step {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .step-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 0.78rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-done {
+            background: rgba(168, 213, 162, 0.2);
+            color: #a8d5a2;
+            border: 1px solid rgba(168, 213, 162, 0.3);
+        }
+        .step-active {
+            background: rgba(255, 200, 60, 0.15);
+            color: #f5c842;
+            border: 1px solid rgba(255, 200, 60, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .step-text {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+        }
+        .step-text strong {
+            color: #fff;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pending-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 28px;
+            border-radius: var(--radius-pill);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(140, 144, 125, 0.55);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-family: "Montserrat", sans-serif;
+            font-size: 0.84rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+        }
+        .btn-home:hover {
+            background: rgba(111, 115, 99, 0.75);
+            transform: translateY(-1px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+        }
+        .btn-signin {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+        }
+        .btn-signin:hover {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+        }
+
+        @media (max-width: 600px) {
+            .pending-card { padding: 36px 22px 32px; }
+            .pending-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="pending-card">
+        <div class="pending-brand">
+            <span class="brand-script">M</span>
+            <span class="brand-name">ManageraHub</span>
+        </div>
+
+        <div class="pending-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+        </div>
+
+        <p class="pending-kicker">Account Created</p>
+        <h1 class="pending-title">Pending Approval</h1>
+        <p class="pending-desc">
+            Your company account has been successfully created. An administrator will review your information to verify your company before granting access.
+        </p>
+
+        <div class="pending-steps">
+            <div class="pending-step">
+                <span class="step-num step-done">✓</span>
+                <span class="step-text"><strong>Account created</strong> — your information has been saved</span>
+            </div>
+            <div class="pending-step">
+                <span class="step-num step-active">2</span>
+                <span class="step-text"><strong>Admin review</strong> — we're verifying your company</span>
+            </div>
+            <div class="pending-step">
+                <span class="step-num" style="background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.1);">3</span>
+                <span class="step-text" style="color: rgba(255,255,255,0.45);"><strong style="color: rgba(255,255,255,0.55);">Access granted</strong> — you can sign in and start hiring</span>
+            </div>
+        </div>
+
+        <div class="pending-actions">
+            <a href="{% url 'home' %}" class="btn-home">Back to Home</a>
+            <a href="{% url 'signin' %}" class="btn-home btn-signin">Sign In</a>
+        </div>
+    </div>
+</body>
+</html>

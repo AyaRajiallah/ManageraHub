@@ -1,0 +1,439 @@
+{% extends "company/base.html" %}
+
+{% block title %}Company Profile | ManageraHub{% endblock %}
+
+{% block company_main %}
+<form method="post" enctype="multipart/form-data" class="candidate-form-grid candidate-profile-form-grid" id="company-profile-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="candidate-form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <!-- Removed duplicate hidden file inputs -->
+
+    <section class="candidate-profile-header-card" id="profile-completion">
+        <div class="candidate-profile-cover" data-cover-preview {% if company_profile.background_image %}style="background-image: linear-gradient(135deg, rgba(90,93,74,0.35), rgba(140,144,125,0.28)), url('{{ company_profile.background_image.url }}'); background-size: cover; background-position: center;"{% endif %}>
+            <div class="candidate-profile-cover-actions">
+                <label for="id_bg_branding" class="candidate-profile-cover-action" aria-label="Update cover background">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M9 4l1.6-2h2.8L15 4h3a3 3 0 0 1 3 3v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a3 3 0 0 1 3-3h3zm3 5.2A4.8 4.8 0 1 0 16.8 14A4.8 4.8 0 0 0 12 9.2zm0 2A2.8 2.8 0 1 1 9.2 14a2.8 2.8 0 0 1 2.8-2.8z" fill="currentColor"></path>
+                    </svg>
+                </label>
+                <button type="button" class="candidate-profile-cover-action" data-remove-cover-preview aria-label="Remove cover">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="candidate-profile-header-body">
+            <div class="candidate-profile-header-main">
+                <div class="candidate-profile-header-avatar-wrap">
+                    {% if company_profile.logo %}
+                    <img src="{{ company_profile.logo.url }}" alt="{{ company_display_name }}" class="candidate-profile-header-avatar-image">
+                    {% else %}
+                    <span class="candidate-profile-header-avatar">{{ company_initials }}</span>
+                    {% endif %}
+                    <div class="candidate-profile-avatar-actions">
+                        <label for="id_logo_branding" class="candidate-profile-avatar-edit" aria-label="Change logo" style="cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path>
+                            </svg>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="candidate-profile-header-copy">
+                    <div class="candidate-profile-header-title-row">
+                        <div>
+                            <h1>{{ company_display_name }}</h1>
+                            <p class="candidate-profile-header-headline">
+                                {% if company_profile.industry %}{{ company_profile.industry }}{% else %}Add your industry{% endif %}
+                                {% if company_profile.company_size %} · {{ company_profile.company_size }}{% endif %}
+                            </p>
+                            <p class="candidate-profile-header-location">
+                                {% if company_profile.city %}{{ company_profile.city }}{% else %}Add your city{% endif %}{% if company_profile.country %}, {{ company_profile.country }}{% endif %}
+                                {% if company_profile.website %}
+                                · <a href="{{ company_profile.website }}" class="candidate-inline-link" target="_blank">Website</a>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="candidate-profile-header-actions">
+                        <button type="submit" class="pill-button pill-button-dark">Update profile</button>
+                        <a href="#section-branding" class="pill-button pill-button-light">Branding</a>
+                        <a href="{% url 'company_dashboard' %}" class="pill-button pill-button-light">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="candidate-profile-header-side">
+                <a href="#profile-editor" onclick="setTimeout(() => { const el = document.querySelector('[aria-controls=\'section-identity\']'); if(el && el.getAttribute('aria-expanded')==='false'){ el.click(); } }, 50);" class="candidate-profile-side-item" style="text-decoration:none; display:block; position:relative; transition:background .15s; border-radius:12px;" onmouseover="this.style.background='rgba(90,93,74,0.04)'" onmouseout="this.style.background='transparent'">
+                    <div style="position:absolute; top:16px; right:16px; color:#8c907d;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                    </div>
+                    <strong>{% if company_profile.industry %}{{ company_profile.industry }}{% else %}Industry not set{% endif %}</strong>
+                    <span>{% if company_profile.company_size %}{{ company_profile.company_size }} employees{% else %}Size not set — Click to edit{% endif %}</span>
+                </a>
+                <div class="candidate-profile-side-item">
+                    <strong>{{ company_profile.completion_percent }}% complete</strong>
+                    <span>Keep your company profile polished and recruiter-ready.</span>
+                    <div class="candidate-profile-side-progress">
+                        <span style="width: {{ company_profile.completion_percent }}%;"></span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    {% if success %}
+    <section class="candidate-alert candidate-alert-success">
+        Your company profile has been updated successfully.
+    </section>
+    {% endif %}
+
+    <!-- Description / Bio section -->
+    <section class="candidate-profile-bio-card candidate-profile-section-card" data-profile-section>
+        <div class="candidate-profile-bio-head candidate-profile-section-head">
+            <div>
+                <h2>About</h2>
+                <p>Tell candidates about your company, culture, and mission.</p>
+            </div>
+            <div class="candidate-profile-section-actions">
+                <button type="button" class="candidate-profile-section-icon candidate-profile-edit-action-light" data-profile-edit-toggle aria-expanded="false" aria-controls="section-about">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="candidate-profile-section-view candidate-profile-bio-content">
+            {% if company_profile.description %}
+            <p>{{ company_profile.description }}</p>
+            {% else %}
+            <p>Add a company description to help candidates understand your mission and culture.</p>
+            {% endif %}
+        </div>
+        <div class="candidate-profile-section-edit" id="section-about" hidden>
+            <div class="candidate-form-field">
+                <label for="{{ form.description.id_for_label }}">Company description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="candidate-form-error">{{ form.description.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="candidate-profile-section-edit-actions">
+                <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Sections -->
+    <section class="candidate-profile-editor-card candidate-panel-card candidate-panel-card-wide" id="profile-editor">
+        <div class="candidate-profile-editor-head">
+            <div>
+                <p class="candidate-card-kicker">Profile sections</p>
+                <h2>Show your saved profile first, then update section by section</h2>
+                <p>Each card shows your current information. Open only the section you want to edit.</p>
+            </div>
+        </div>
+
+        <!-- Company Name & Industry -->
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Company identity</h3>
+                    <p>Name, industry, and company size.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-identity">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <p class="candidate-profile-view-title">{{ company_display_name }}</p>
+                <p class="candidate-profile-view-copy">
+                    {% if company_profile.industry %}{{ company_profile.industry }}{% else %}Add your industry{% endif %}
+                    {% if company_profile.company_size %} · {{ company_profile.company_size }}{% endif %}
+                </p>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-identity" hidden>
+                <div class="candidate-form-field">
+                    <label for="{{ form.company_name.id_for_label }}">Company name</label>
+                    {{ form.company_name }}
+                    {% if form.company_name.errors %}<div class="candidate-form-error">{{ form.company_name.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.industry.id_for_label }}">Industry</label>
+                        {{ form.industry }}
+                        {% if form.industry.errors %}<div class="candidate-form-error">{{ form.industry.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field">
+                        <label for="{{ form.company_size.id_for_label }}">Company size</label>
+                        {{ form.company_size }}
+                        {% if form.company_size.errors %}<div class="candidate-form-error">{{ form.company_size.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact information -->
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Contact information</h3>
+                    <p>Email, phone, and website.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-contact">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-inline-list">
+                    <span>{{ company_profile.user.email }}</span>
+                    <span>{% if company_profile.phone_number %}{{ company_profile.phone_number }}{% else %}Add your phone number{% endif %}</span>
+                    <span>{% if company_profile.website %}{{ company_profile.website }}{% else %}Add your website{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-contact" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.phone_number.id_for_label }}">Phone number</label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}<div class="candidate-form-error">{{ form.phone_number.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field">
+                        <label for="{{ form.website.id_for_label }}">Website</label>
+                        {{ form.website }}
+                        {% if form.website.errors %}<div class="candidate-form-error">{{ form.website.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location -->
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Location</h3>
+                    <p>City and country.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-location">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-inline-list">
+                    <span>{% if company_profile.city %}{{ company_profile.city }}{% else %}Add your city{% endif %}</span>
+                    <span>{% if company_profile.country %}{{ company_profile.country }}{% else %}Add your country{% endif %}</span>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-location" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.city.id_for_label }}">City</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}<div class="candidate-form-error">{{ form.city.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field">
+                        <label for="{{ form.country.id_for_label }}">Country</label>
+                        {{ form.country }}
+                        {% if form.country.errors %}<div class="candidate-form-error">{{ form.country.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Branding: Logo & Cover Image -->
+        <section class="candidate-profile-section-card" data-profile-section id="section-branding">
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Branding</h3>
+                    <p>Company logo and cover image.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-branding-edit">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-entry-list">
+                    <div class="candidate-profile-entry">
+                        <strong>Company logo</strong>
+                        <span>{% if company_profile.logo %}Logo uploaded{% else %}No logo yet{% endif %}</span>
+                    </div>
+                    <div class="candidate-profile-entry">
+                        <strong>Cover image</strong>
+                        <span>{% if company_profile.background_image %}Cover image uploaded{% else %}No cover image yet{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-branding-edit" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label>Company logo</label>
+                        <input type="file" name="logo" accept="image/*" id="id_logo_branding">
+                        {% if company_profile.logo %}
+                        <a href="{{ company_profile.logo.url }}" class="candidate-inline-link" target="_blank">Current logo</a>
+                        {% endif %}
+                        {% if form.logo.errors %}<div class="candidate-form-error">{{ form.logo.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field">
+                        <label>Cover image</label>
+                        <input type="file" name="background_image" accept="image/*" id="id_bg_branding">
+                        {% if company_profile.background_image %}
+                        <a href="{{ company_profile.background_image.url }}" class="candidate-inline-link" target="_blank">Current cover</a>
+                        {% endif %}
+                        {% if form.background_image.errors %}<div class="candidate-form-error">{{ form.background_image.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="candidate-card-actions">
+            <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save profile</button>
+            <a href="{% url 'company_dashboard' %}" class="pill-button pill-button-light">Back to dashboard</a>
+        </div>
+    </section>
+</form>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    (() => {
+        const profileSections = Array.from(document.querySelectorAll("[data-profile-section]"));
+        const coverPreview = document.querySelector("[data-cover-preview]");
+        const bgInput = document.getElementById("id_bg_branding");
+        const removeCoverBtn = document.querySelector("[data-remove-cover-preview]");
+        const avatarMenuWrap = document.querySelector("[data-avatar-menu-wrap]");
+        const avatarMenuToggle = document.querySelector("[data-avatar-menu-toggle]");
+        const avatarMenu = document.querySelector("[data-avatar-menu]");
+        const logoInput = document.getElementById("id_logo_branding");
+
+        const openSection = (section) => {
+            profileSections.forEach((card) => {
+                const editPanel = card.querySelector(".candidate-profile-section-edit");
+                const toggle = card.querySelector("[data-profile-edit-toggle]");
+                const isTarget = card === section;
+                if (!editPanel || !toggle) return;
+                editPanel.hidden = !isTarget;
+                card.classList.toggle("is-editing", isTarget);
+                toggle.setAttribute("aria-expanded", String(isTarget));
+            });
+        };
+
+        profileSections.forEach((section) => {
+            const toggle = section.querySelector("[data-profile-edit-toggle]");
+            const cancel = section.querySelector("[data-profile-cancel]");
+            if (toggle) {
+                toggle.addEventListener("click", () => {
+                    const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+                    if (isExpanded) {
+                        const editPanel = section.querySelector(".candidate-profile-section-edit");
+                        if (editPanel) editPanel.hidden = true;
+                        section.classList.remove("is-editing");
+                        toggle.setAttribute("aria-expanded", "false");
+                        return;
+                    }
+                    openSection(section);
+                });
+            }
+            if (cancel) {
+                cancel.addEventListener("click", () => {
+                    const editPanel = section.querySelector(".candidate-profile-section-edit");
+                    if (editPanel) editPanel.hidden = true;
+                    section.classList.remove("is-editing");
+                    if (toggle) toggle.setAttribute("aria-expanded", "false");
+                });
+            }
+        });
+
+        if (avatarMenuToggle && avatarMenu) {
+            avatarMenuToggle.addEventListener("click", () => {
+                const isOpen = avatarMenuToggle.getAttribute("aria-expanded") === "true";
+                avatarMenu.hidden = isOpen;
+                avatarMenuToggle.setAttribute("aria-expanded", String(!isOpen));
+            });
+            document.addEventListener("click", (event) => {
+                if (!avatarMenuWrap || avatarMenu.hidden) return;
+                if (!event.target.closest("[data-avatar-menu-wrap]")) {
+                    avatarMenu.hidden = true;
+                    avatarMenuToggle.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+
+        const previewFile = (input, callback) => {
+            const [file] = input.files || [];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => callback(event.target?.result || "");
+            reader.readAsDataURL(file);
+        };
+
+        /* Cover image: camera icon triggers the hidden background_image input */
+        if (coverPreview && bgInput) {
+            bgInput.addEventListener("change", () => {
+                previewFile(bgInput, (result) => {
+                    if (!result) return;
+                    coverPreview.style.backgroundImage = "linear-gradient(135deg, rgba(90,93,74,0.35), rgba(140,144,125,0.28)), url('" + result + "')";
+                    coverPreview.style.backgroundSize = "cover";
+                    coverPreview.style.backgroundPosition = "center";
+                });
+            });
+        }
+
+        if (removeCoverBtn && bgInput && coverPreview) {
+            removeCoverBtn.addEventListener("click", () => {
+                bgInput.value = "";
+                coverPreview.style.backgroundImage = "";
+                coverPreview.style.backgroundSize = "";
+                coverPreview.style.backgroundPosition = "";
+            });
+        }
+
+        /* Logo: avatar edit triggers the hidden logo input */
+        if (logoInput) {
+            logoInput.addEventListener("change", () => {
+                previewFile(logoInput, (result) => {
+                    if (!result) return;
+                    const currentImg = document.querySelector(".candidate-profile-header-avatar-image");
+                    const currentFallback = document.querySelector(".candidate-profile-header-avatar");
+                    if (currentImg) {
+                        currentImg.src = result;
+                    } else if (currentFallback) {
+                        const img = document.createElement("img");
+                        img.src = result;
+                        img.alt = "{{ company_display_name|escapejs }}";
+                        img.className = "candidate-profile-header-avatar-image";
+                        currentFallback.replaceWith(img);
+                    }
+                });
+            });
+        }
+    })();
+</script>
+{% endblock %}

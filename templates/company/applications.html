@@ -1,0 +1,52 @@
+{% extends "company/base.html" %}
+
+{% block title %}Applications | ManageraHub{% endblock %}
+
+{% block company_main %}
+<style>
+    .co-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+    .co-filter-pill{display:inline-flex;align-items:center;padding:7px 16px;border-radius:999px;font-size:.76rem;font-weight:600;text-decoration:none;border:1px solid rgba(90,93,74,.12);background:#fff;color:#6b6e5c;transition:background .15s}
+    .co-filter-pill:hover{background:#f0f1eb}
+    .co-filter-pill.is-active{background:#5a5d4a;color:#fff;border-color:#5a5d4a}
+    .co-status-badge{display:inline-flex;padding:4px 12px;border-radius:999px;font-size:.7rem;font-weight:700}
+    .co-status-sent{background:#e3f2fd;color:#1565c0}
+    .co-status-under_review{background:#fff3e0;color:#e65100}
+    .co-status-accepted{background:#e8f5e9;color:#2e7d32}
+    .co-status-rejected{background:#fce4ec;color:#c62828}
+    .co-status-interview_scheduled{background:#f3e5f5;color:#7b1fa2}
+</style>
+
+<section class="candidate-hero-card" style="padding:28px 30px 24px;">
+    <div>
+        <p class="candidate-card-kicker" style="color:rgba(255,255,255,.7)">Talent Pipeline</p>
+        <h1 style="margin:4px 0 0;font-size:1.5rem;">Applications</h1>
+    </div>
+</section>
+
+<div class="co-filter-bar">
+    <a href="{% url 'company_applications' %}" class="co-filter-pill{% if not status_filter %} is-active{% endif %}">All</a>
+    {% for value, label in status_choices %}
+    <a href="{% url 'company_applications' %}?status={{ value }}" class="co-filter-pill{% if status_filter == value %} is-active{% endif %}">{{ label }}</a>
+    {% endfor %}
+</div>
+
+{% for app in applications %}
+<section class="candidate-profile-section-card" style="margin-bottom:10px;">
+    <div class="candidate-profile-section-head">
+        <div>
+            <h3 style="margin:0;">{{ app.full_name }}</h3>
+            <p style="margin:2px 0 0;">Applied for {{ app.job_offer.title }} · {{ app.submitted_at|date:"M d, Y" }} · {{ app.email }}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span class="co-status-badge co-status-{{ app.status }}">{{ app.get_status_display }}</span>
+            <a href="{% url 'company_application_detail' app.id %}" class="pill-button pill-button-light" style="min-height:32px;padding:0 14px;font-size:.74rem;">Review →</a>
+        </div>
+    </div>
+</section>
+{% empty %}
+<div class="candidate-placeholder-card">
+    <h3>No applications{% if status_filter %} with this status{% endif %}</h3>
+    <p>Applications from candidates will appear here as they apply to your job postings.</p>
+</div>
+{% endfor %}
+{% endblock %}

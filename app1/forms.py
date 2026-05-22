@@ -125,6 +125,53 @@ class JobOfferFilterForm(forms.Form):
     )
 
 
+class CompanyJobFilterForm(forms.Form):
+    keyword = forms.CharField(required=False)
+    job_type = forms.ChoiceField(
+        required=False,
+        choices=[("", "All job types")] + JobOffer.JOB_TYPE_CHOICES,
+    )
+    contract_type = forms.ChoiceField(
+        required=False,
+        choices=[("", "All contract types")] + JobOffer.CONTRACT_TYPE_CHOICES,
+    )
+    experience_level = forms.ChoiceField(
+        required=False,
+        choices=[("", "All experience levels")] + JobOffer.EXPERIENCE_LEVEL_CHOICES,
+    )
+    status = forms.ChoiceField(
+        required=False,
+        choices=[("", "All statuses"), ("active", "Active"), ("inactive", "Inactive")],
+    )
+    date_posted = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "Any date"),
+            ("7", "Last 7 days"),
+            ("30", "Last 30 days"),
+            ("90", "Last 90 days"),
+        ],
+    )
+
+
+class CompanyApplicationFilterForm(forms.Form):
+    keyword = forms.CharField(required=False)
+    status = forms.ChoiceField(
+        required=False,
+        choices=[("", "All statuses")] + JobApplication.STATUS_CHOICES,
+    )
+    job_title = forms.CharField(required=False)
+    date_received = forms.ChoiceField(
+        required=False,
+        choices=[
+            ("", "Any date"),
+            ("7", "Last 7 days"),
+            ("30", "Last 30 days"),
+            ("90", "Last 90 days"),
+        ],
+    )
+
+
 class JobApplicationForm(forms.ModelForm):
     use_profile_cv = forms.BooleanField(required=False, initial=True)
     use_profile_cover_letter = forms.BooleanField(required=False, initial=True)
@@ -180,3 +227,86 @@ class JobApplicationForm(forms.ModelForm):
         if commit:
             application.save()
         return application
+
+
+from .models import CompanyProfile
+
+
+class CompanyProfileForm(forms.ModelForm):
+    INDUSTRY_CHOICES = [
+        ("", "Select an industry"),
+        ("Technology", "Technology"),
+        ("Healthcare", "Healthcare"),
+        ("Finance", "Finance"),
+        ("Education", "Education"),
+        ("Retail", "Retail"),
+        ("Manufacturing", "Manufacturing"),
+        ("Consulting", "Consulting"),
+        ("Real Estate", "Real Estate"),
+        ("Telecommunications", "Telecommunications"),
+        ("Other", "Other"),
+    ]
+    SIZE_CHOICES = [
+        ("", "Select company size"),
+        ("1-10", "1-10 employees"),
+        ("11-50", "11-50 employees"),
+        ("51-200", "51-200 employees"),
+        ("201-500", "201-500 employees"),
+        ("501-1000", "501-1000 employees"),
+        ("1000+", "1000+ employees"),
+    ]
+
+    class Meta:
+        model = CompanyProfile
+        fields = [
+            "company_name",
+            "industry",
+            "company_size",
+            "phone_number",
+            "city",
+            "country",
+            "website",
+            "description",
+            "logo",
+            "background_image",
+        ]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 5}),
+        }
+        labels = {
+            "company_name": "Company name",
+            "phone_number": "Phone number",
+            "background_image": "Cover image",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["industry"].widget = forms.Select(choices=self.INDUSTRY_CHOICES)
+        self.fields["company_size"].widget = forms.Select(choices=self.SIZE_CHOICES)
+
+
+class JobOfferForm(forms.ModelForm):
+    class Meta:
+        model = JobOffer
+        fields = [
+            "title",
+            "city",
+            "country",
+            "job_type",
+            "contract_type",
+            "experience_level",
+            "summary",
+            "responsibilities",
+            "requirements",
+            "salary_range",
+            "is_remote",
+        ]
+        widgets = {
+            "summary": forms.Textarea(attrs={"rows": 4}),
+            "responsibilities": forms.Textarea(attrs={"rows": 5}),
+            "requirements": forms.Textarea(attrs={"rows": 5}),
+        }
+        labels = {
+            "is_remote": "This is a remote position",
+            "salary_range": "Salary range (optional)",
+        }

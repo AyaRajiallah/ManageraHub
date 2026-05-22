@@ -1,0 +1,86 @@
+{% extends "company/base.html" %}
+
+{% block title %}Company Dashboard | ManageraHub{% endblock %}
+
+{% block company_main %}
+<section class="candidate-hero-card">
+    <p class="candidate-card-kicker">Company Dashboard</p>
+    <h1>Welcome, {{ company_display_name }}.</h1>
+    <p>Manage your job postings, review applications, and build your team — all from one place.</p>
+    <div class="candidate-hero-actions">
+        <a href="{% url 'company_post_job' %}" class="pill-button pill-button-dark">Post a Job</a>
+        <a href="{% url 'company_applications' %}" class="pill-button pill-button-light">View Applications</a>
+    </div>
+</section>
+
+<section class="candidate-stats-grid">
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Jobs</p>
+        <strong>{{ company_stats.posted_jobs }}</strong>
+        <span>Active job postings</span>
+    </article>
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Applications</p>
+        <strong>{{ company_stats.total_applications }}</strong>
+        <span>Total applications received</span>
+    </article>
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Pending</p>
+        <strong>{{ company_stats.pending_applications }}</strong>
+        <span>Awaiting your review</span>
+    </article>
+    <article class="candidate-stat-card">
+        <p class="candidate-card-kicker">Accepted</p>
+        <strong>{{ company_stats.accepted_applications }}</strong>
+        <span>Candidates accepted</span>
+    </article>
+</section>
+
+<section class="candidate-content-grid">
+    <article class="candidate-panel-card candidate-panel-card-wide">
+        <p class="candidate-card-kicker">Recent applications</p>
+        <h2>Latest candidates</h2>
+        {% if recent_applications %}
+        <div class="candidate-list-card">
+            {% for app in recent_applications %}
+            <div class="candidate-list-item">
+                <span>{{ app.full_name }} — applied for {{ app.job_offer.title }}</span>
+                <a href="{% url 'company_application_detail' app.id %}">Review</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="candidate-placeholder-card">
+            <h3>No applications yet</h3>
+            <p>Applications will appear here when candidates apply to your job offers.</p>
+        </div>
+        {% endif %}
+    </article>
+
+    <article class="candidate-panel-card">
+        <p class="candidate-card-kicker">Quick links</p>
+        <div class="candidate-mini-links" style="gap:0;">
+            <a href="{% url 'company_post_job' %}" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:14px;background:#f8f8f5;border:1px solid rgba(90,93,74,0.06);font-size:0.84rem;font-weight:600;color:#4a4d3c;text-decoration:none;margin-bottom:8px;transition:background .18s,transform .15s;"><span style="font-size:1rem;color:#8c907d;">→</span> Post a new job</a>
+            <a href="{% url 'company_jobs' %}" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:14px;background:#f8f8f5;border:1px solid rgba(90,93,74,0.06);font-size:0.84rem;font-weight:600;color:#4a4d3c;text-decoration:none;margin-bottom:8px;transition:background .18s,transform .15s;"><span style="font-size:1rem;color:#8c907d;">→</span> Manage my jobs</a>
+            <a href="{% url 'company_profile' %}" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:14px;background:#f8f8f5;border:1px solid rgba(90,93,74,0.06);font-size:0.84rem;font-weight:600;color:#4a4d3c;text-decoration:none;margin-bottom:8px;transition:background .18s,transform .15s;"><span style="font-size:1rem;color:#8c907d;">→</span> Company profile</a>
+            <a href="{% url 'account_logout' %}" style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:14px;background:#f8f8f5;border:1px solid rgba(90,93,74,0.06);font-size:0.84rem;font-weight:600;color:#4a4d3c;text-decoration:none;transition:background .18s,transform .15s;"><span style="font-size:1rem;color:#8c907d;">→</span> Sign out</a>
+        </div>
+    </article>
+
+    <article class="candidate-panel-card">
+        <p class="candidate-card-kicker">Active jobs</p>
+        {% if active_jobs %}
+        <div class="candidate-mini-stack">
+            {% for job in active_jobs %}
+            <div class="candidate-mini-entry">
+                <strong>{{ job.title }}</strong>
+                <span>{{ job.applications.count }} application{{ job.applications.count|pluralize }} · {{ job.get_contract_type_display }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No jobs posted yet. Start from the Post a Job page.</p>
+        {% endif %}
+    </article>
+</section>
+{% endblock %}

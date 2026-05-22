@@ -17,6 +17,111 @@
     .mh-home-pill-dark:visited {
         color: #f1faee !important;
     }
+
+    .mh-pending-section {
+        margin: 0 auto 22px;
+        padding: 24px 28px;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid rgba(79, 12, 40, 0.08);
+        box-shadow: 0 4px 16px rgba(79, 12, 40, 0.06);
+    }
+    .mh-pending-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+    .mh-pending-header div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .mh-pending-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 14px;
+        border-radius: 999px;
+        background: #fff3e0;
+        color: #e65100;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        border: 1px solid rgba(230, 81, 0, 0.15);
+    }
+    .mh-pending-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-top: 1px solid rgba(79, 12, 40, 0.06);
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .mh-pending-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .mh-pending-name {
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #2b2230;
+    }
+    .mh-pending-meta {
+        font-size: 0.78rem;
+        color: #6b6171;
+    }
+    .mh-pending-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .mh-pending-actions a {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 16px;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .mh-pending-actions a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .mh-btn-detail {
+        background: #f8f6f3;
+        color: #4f0c28;
+        border-color: rgba(79, 12, 40, 0.12);
+    }
+    .mh-btn-approve {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-color: rgba(46, 125, 50, 0.2);
+    }
+    .mh-btn-reject {
+        background: #fce4ec;
+        color: #c62828;
+        border-color: rgba(198, 40, 40, 0.2);
+    }
+    .mh-stat-pending {
+        border-left: 3px solid #e65100 !important;
+    }
+    .mh-stat-pending .mh-home-kicker {
+        color: #e65100 !important;
+    }
+    .mh-pending-empty {
+        padding: 18px 0;
+        text-align: center;
+        color: #6b6171;
+        font-size: 0.88rem;
+    }
 </style>
 {% endblock %}
 
@@ -30,10 +135,10 @@
                 <div class="mh-home-admin-copy">
                     <span class="mh-home-kicker">Admin Dashboard</span>
                     <h1>Welcome to Administration</h1>
-                    <p>Manage your platform users, permissions, and monitor activity from this clean dashboard.</p>
+                    <p>Manage your platform users, approve company accounts, and monitor activity from this clean dashboard.</p>
                     <div class="mh-home-admin-actions">
                         <a href="/admin/auth/user/" class="mh-home-pill mh-home-pill-dark">Manage Users</a>
-                        <a href="/admin/auth/group/" class="mh-home-pill mh-home-pill-light">Roles & Permissions</a>
+                        <a href="/admin/app1/companyprofile/?is_approved__exact=0" class="mh-home-pill mh-home-pill-light">Pending Companies</a>
                     </div>
                 </div>
             </article>
@@ -55,12 +160,42 @@
                 <strong>{{ active_count|default:0 }}</strong>
                 <p>Currently active</p>
             </a>
-            <a href="/admin/admin/logentry/" class="mh-home-stat-card">
-                <span class="mh-home-kicker">Recent Activity</span>
-                <strong>{{ activity_count|default:0 }}</strong>
-                <p>Admin actions log</p>
+            <a href="/admin/app1/companyprofile/?is_approved__exact=0" class="mh-home-stat-card mh-stat-pending">
+                <span class="mh-home-kicker">Pending Companies</span>
+                <strong>{{ pending_count|default:0 }}</strong>
+                <p>Awaiting approval</p>
             </a>
         </section>
+
+        {% if pending_companies %}
+        <section class="mh-pending-section">
+            <div class="mh-pending-header">
+                <div>
+                    <span class="mh-home-kicker">Companies Awaiting Approval</span>
+                    <h2 style="margin:0; font-family:'Bodoni Moda',Georgia,serif; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:#4f0c28; font-size:1.3rem;">Review pending company accounts</h2>
+                </div>
+                <span class="mh-pending-badge">{{ pending_count }} pending</span>
+            </div>
+            {% for company in pending_companies %}
+            <div class="mh-pending-row">
+                <div class="mh-pending-info">
+                    <span class="mh-pending-name">{{ company.company_name }}</span>
+                    <span class="mh-pending-meta">
+                        {{ company.user.email }}
+                        {% if company.industry %} · {{ company.industry }}{% endif %}
+                        {% if company.city %} · {{ company.city }}{% endif %}{% if company.country %}, {{ company.country }}{% endif %}
+                        · Registered {{ company.created_at|date:"M d, Y" }}
+                    </span>
+                </div>
+                <div class="mh-pending-actions">
+                    <a href="/admin/app1/companyprofile/{{ company.pk }}/change/" class="mh-btn-detail">View details</a>
+                    <a href="{% url 'admin_approve_company' company.pk %}" class="mh-btn-approve">✓ Approve</a>
+                    <a href="{% url 'admin_reject_company' company.pk %}" class="mh-btn-reject">✗ Reject</a>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
 
         <section class="mh-home-admin-table-card">
             <div class="mh-home-admin-table-head">

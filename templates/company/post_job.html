@@ -1,0 +1,80 @@
+{% extends "company/base.html" %}
+
+{% block title %}Post a Job | ManageraHub{% endblock %}
+
+{% block company_main %}
+<section class="candidate-profile-editor-card candidate-panel-card candidate-panel-card-wide">
+    <div class="candidate-profile-editor-head">
+        <div>
+            <p class="candidate-card-kicker">New Job Posting</p>
+            <h2>Post a new job</h2>
+            <p>Fill in the details below. The job will be visible to candidates immediately.</p>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <section class="candidate-profile-section-card" style="border:none;padding:0">
+            <div class="candidate-form-row">
+                <div class="candidate-form-field" style="flex:2">
+                    <label for="{{ form.title.id_for_label }}">Job title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="candidate-form-error">{{ form.title.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="candidate-form-row">
+                <div class="candidate-form-field">
+                    <label for="{{ form.city.id_for_label }}">City</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<div class="candidate-form-error">{{ form.city.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-form-field">
+                    <label for="{{ form.country.id_for_label }}">Country</label>
+                    {{ form.country }}
+                    {% if form.country.errors %}<div class="candidate-form-error">{{ form.country.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="candidate-form-row">
+                <div class="candidate-form-field">
+                    <label for="{{ form.job_type.id_for_label }}">Job type</label>
+                    {{ form.job_type }}
+                </div>
+                <div class="candidate-form-field">
+                    <label for="{{ form.contract_type.id_for_label }}">Contract type</label>
+                    {{ form.contract_type }}
+                </div>
+                <div class="candidate-form-field">
+                    <label for="{{ form.experience_level.id_for_label }}">Experience level</label>
+                    {{ form.experience_level }}
+                </div>
+            </div>
+            <div class="candidate-form-field">
+                <label for="{{ form.salary_range.id_for_label }}">{{ form.salary_range.label }}</label>
+                {{ form.salary_range }}
+            </div>
+            <div class="candidate-form-field">
+                <label for="{{ form.summary.id_for_label }}">Summary</label>
+                {{ form.summary }}
+            </div>
+            <div class="candidate-form-field">
+                <label for="{{ form.responsibilities.id_for_label }}">Responsibilities</label>
+                {{ form.responsibilities }}
+            </div>
+            <div class="candidate-form-field">
+                <label for="{{ form.requirements.id_for_label }}">Requirements</label>
+                {{ form.requirements }}
+            </div>
+            <div class="candidate-checkbox-field" style="padding:12px 0">
+                <label class="candidate-checkbox-label">
+                    {{ form.is_remote }}
+                    <span>{{ form.is_remote.label }}</span>
+                </label>
+            </div>
+        </section>
+        <div class="candidate-card-actions">
+            <button type="submit" class="pill-button pill-button-dark">Publish Job</button>
+            <a href="{% url 'company_jobs' %}" class="pill-button pill-button-light">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
