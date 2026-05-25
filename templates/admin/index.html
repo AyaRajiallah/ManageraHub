@@ -122,6 +122,62 @@
         color: #6b6171;
         font-size: 0.88rem;
     }
+
+    /* Verify Identity Dropdown */
+    .mh-verify-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .mh-verify-toggle {
+        cursor: pointer;
+        user-select: none;
+    }
+    .mh-verify-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 260px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid rgba(79,12,40,0.1);
+        box-shadow: 0 8px 32px rgba(79,12,40,0.13), 0 2px 8px rgba(0,0,0,0.06);
+        z-index: 1000;
+        padding: 6px;
+        animation: mh-verify-fade 0.18s ease;
+    }
+    .mh-verify-menu.mh-verify-open {
+        display: block;
+    }
+    @keyframes mh-verify-fade {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .mh-verify-menu a {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px !important;
+        border-radius: 8px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        color: #2b2230 !important;
+        text-decoration: none !important;
+        transition: background 0.15s !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    .mh-verify-menu a:hover {
+        background: #f3f0f5 !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    .mh-verify-icon {
+        font-size: 1.1em;
+        flex-shrink: 0;
+        width: 22px;
+        text-align: center;
+    }
 </style>
 {% endblock %}
 
@@ -185,10 +241,60 @@
                         {% if company.industry %} · {{ company.industry }}{% endif %}
                         {% if company.city %} · {{ company.city }}{% endif %}{% if company.country %}, {{ company.country }}{% endif %}
                         · Registered {{ company.created_at|date:"M d, Y" }}
+                        {% if company.ice %}
+                        <br>
+                        <strong style="color: #4f0c28;">ICE:</strong> <span style="font-family: monospace; letter-spacing:0.05em;">{{ company.ice }}</span>
+                        {% endif %}
+                        {% if company.rc_number %}
+                        · <strong>RC:</strong> {{ company.rc_number }}
+                        {% endif %}
                     </span>
                 </div>
                 <div class="mh-pending-actions">
                     <a href="/admin/app1/companyprofile/{{ company.pk }}/change/" class="mh-btn-detail">View details</a>
+                    
+                    {% if company.legal_document %}
+                    <a href="{{ company.legal_document.url }}" target="_blank" class="mh-btn-detail" style="background:#e0f7fa; color:#006064; border-color:rgba(0,96,100,0.15);" title="Download Modèle J / Attestation d'ICE">📄 Legal Doc</a>
+                    {% endif %}
+                    
+                    {% if company.ice %}
+                    <div class="mh-verify-dropdown" style="position:relative; display:inline-block;">
+                        <a href="#" 
+                           class="mh-btn-detail mh-verify-toggle" 
+                           style="background:#f1f8e9; color:#33691e; border-color:rgba(51,105,30,0.15);"
+                           title="Verify company identity on official registries"
+                           onclick="event.preventDefault(); this.nextElementSibling.classList.toggle('mh-verify-open');">🔍 Verify Identity ▾</a>
+                        <div class="mh-verify-menu">
+                            <a href="https://www.google.com/search?q=%22{{ company.ice }}%22+%22{{ company.company_name|urlencode }}%22+Morocco+ICE" 
+                               target="_blank"
+                               data-hybrid-verify-btn
+                               data-fallback-url="{% url 'admin_verify_company_offline' company.pk %}"
+                               title="Search Google for this company's ICE across all directories">
+                                <span class="mh-verify-icon">🌐</span>
+                                <span>Google — Search ICE</span>
+                            </a>
+                            <a href="https://www.charika.ma" 
+                               target="_blank"
+                               title="Open Charika.ma and search for the company name manually">
+                                <span class="mh-verify-icon">🏢</span>
+                                <span>Charika.ma — Manual Search</span>
+                            </a>
+                            <a href="https://www.kerix.net" 
+                               target="_blank"
+                               title="Open Kerix.net and search for the company name manually">
+                                <span class="mh-verify-icon">📂</span>
+                                <span>Kerix.net — Manual Search</span>
+                            </a>
+                            <a href="{% url 'admin_verify_company_offline' company.pk %}" 
+                               target="_blank"
+                               title="Open offline verification with pre-filled company data">
+                                <span class="mh-verify-icon">📋</span>
+                                <span>Offline Verification</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <a href="{% url 'admin_approve_company' company.pk %}" class="mh-btn-approve">✓ Approve</a>
                     <a href="{% url 'admin_reject_company' company.pk %}" class="mh-btn-reject">✗ Reject</a>
                 </div>
@@ -243,4 +349,26 @@
         </section>
     </div>
 </div>
+<script>
+    // Hybrid verify: redirect to offline fallback if no internet
+    document.querySelectorAll('[data-hybrid-verify-btn]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!navigator.onLine) {
+                e.preventDefault();
+                const fallbackUrl = this.getAttribute('data-fallback-url');
+                window.open(fallbackUrl, '_blank');
+            }
+        });
+    });
+
+    // Close verify dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.mh-verify-menu.mh-verify-open').forEach(menu => {
+            if (!menu.parentElement.contains(e.target)) {
+                menu.classList.remove('mh-verify-open');
+            }
+        });
+    });
+</script>
 {% endblock %}
+

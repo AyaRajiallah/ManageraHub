@@ -1,0 +1,494 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moroccan Business Registry Sandbox | ManageraHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --emerald: #1b5e20;
+            --emerald-light: #e8f5e9;
+            --sage: #8c907d;
+            --sage-dark: #5a5d4a;
+            --bg: #f8f9fa;
+            --text-dark: #2b2230;
+            --text-muted: #6b6171;
+            --shadow: 0 10px 30px rgba(90,93,74,0.08);
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .dashboard-container {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            align-items: stretch;
+        }
+        .sandbox-panel {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid rgba(90,93,74,0.12);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        /* Top green status bar */
+        .sandbox-panel::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--sage-dark), var(--sage), #81c784);
+        }
+        .document-panel {
+            flex: 1.3;
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid rgba(90,93,74,0.12);
+            box-shadow: var(--shadow);
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .document-panel::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #81c784, var(--sage), var(--sage-dark));
+        }
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(90,93,74,0.1);
+        }
+        .doc-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .doc-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(229, 57, 53, 0.08);
+            border-radius: 8px;
+            padding: 8px;
+        }
+        .doc-title {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--sage-dark);
+            text-align: left;
+        }
+        .doc-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            text-align: left;
+        }
+        .btn-view-external {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--sage);
+            background: #ffffff;
+            color: var(--sage-dark);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-view-external:hover {
+            background: var(--sage-dark);
+            color: #ffffff;
+            border-color: var(--sage-dark);
+        }
+        .pdf-frame-wrapper {
+            flex-grow: 1;
+            background: #fafaf9;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(90,93,74,0.15);
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border: none;
+            flex-grow: 1;
+        }
+        .no-doc-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            padding: 40px;
+            text-align: center;
+            background: #fafaf9;
+            min-height: 500px;
+        }
+        .placeholder-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            opacity: 0.5;
+            margin-bottom: 16px;
+        }
+        .placeholder-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--sage-dark);
+            margin-bottom: 6px;
+        }
+        .placeholder-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            max-width: 320px;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                flex-direction: column;
+                padding: 10px;
+                gap: 20px;
+            }
+            .sandbox-panel, .document-panel {
+                width: 100%;
+            }
+            body {
+                padding: 20px 10px;
+                align-items: flex-start;
+            }
+        }
+        .header {
+            margin-bottom: 30px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--emerald-light);
+            color: var(--emerald);
+            border: 1px solid rgba(27,94,32,0.15);
+            margin-bottom: 12px;
+        }
+        .title {
+            font-family: 'Bodoni Moda', Georgia, serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 6px;
+            color: var(--sage-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        
+        /* Simulated Loading Animation */
+        .verif-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(140,144,125,0.15);
+            border-top-color: var(--sage-dark);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .spinner-success {
+            width: 54px;
+            height: 54px;
+            background: var(--emerald-light);
+            color: var(--emerald);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            border: 1px solid rgba(27,94,32,0.15);
+            box-shadow: 0 4px 12px rgba(27,94,32,0.1);
+        }
+        .verif-status-text {
+            margin-top: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--sage-dark);
+        }
+
+        /* Results table */
+        .verif-results {
+            display: none;
+            background: #fafaf9;
+            border-radius: 12px;
+            border: 1px solid rgba(90,93,74,0.08);
+            padding: 24px;
+            text-align: left;
+            margin-bottom: 24px;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .verif-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(90,93,74,0.06);
+            font-size: 0.84rem;
+        }
+        .verif-row:last-child {
+            border-bottom: none;
+        }
+        .verif-label {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .verif-value {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .offline-notice {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #fff3e0;
+            border: 1px solid rgba(230,81,0,0.15);
+            border-radius: 10px;
+            color: #b78103;
+            font-size: 0.76rem;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+        .offline-notice svg {
+            flex-shrink: 0;
+        }
+
+        .btn-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 28px;
+            border-radius: 999px;
+            border: 1px solid var(--sage);
+            background: #ffffff;
+            color: var(--sage-dark);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-close:hover {
+            background: var(--sage-dark);
+            color: #fff;
+            border-color: var(--sage-dark);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Left Panel: Simulated Verification -->
+        <div class="sandbox-panel">
+            <div class="header">
+                <span class="badge">Offline Sandbox Mode</span>
+                <h1 class="title">Moroccan Business Directory</h1>
+                <p class="subtitle">Official simulated lookup for ICE legal entities</p>
+            </div>
+
+            <div class="offline-notice">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.5a3 3 0 0 0-3-3m-6.08-3.06A10.94 10.94 0 0 1 12 5.8a10.94 10.94 0 0 1 6.08 3.06M5 12.5a3 3 0 0 0 3-3m-3 3a3 3 0 0 1-3-3m3 3h14m-14 0a3 3 0 0 0 3 3m11-3a3 3 0 0 1 3 3"></path>
+                </svg>
+                <div>
+                    <strong>Network Status: Offline</strong><br>
+                    Seamlessly intercepted from external lookup to protect your presentation deck from network timeouts.
+                </div>
+            </div>
+
+            <div class="verif-loader">
+                <div class="spinner" id="spinner"></div>
+                <div class="spinner-success" id="spinner-success">✓</div>
+                <div class="verif-status-text" id="status-text">Connecting to local database...</div>
+            </div>
+
+            <div class="verif-results" id="results">
+                <div class="verif-row">
+                    <span class="verif-label">Legal Name:</span>
+                    <span class="verif-value">{{ company.company_name }}</span>
+                </div>
+                <div class="verif-row">
+                    <span class="verif-label">ICE Number:</span>
+                    <span class="verif-value" style="letter-spacing: 0.05em; font-family: monospace; font-size: 0.95rem;">{{ company.ice|default:"—" }}</span>
+                </div>
+                <div class="verif-row">
+                    <span class="verif-label">RC Registry:</span>
+                    <span class="verif-value">{{ company.rc_number|default:"—" }} ({% firstof company.city "Morocco" %})</span>
+                </div>
+                <div class="verif-row">
+                    <span class="verif-label">Legal Status:</span>
+                    <span class="verif-value" style="color: var(--emerald);">ACTIVE / INSCRITE</span>
+                </div>
+                <div class="verif-row">
+                    <span class="verif-label">Website Domain:</span>
+                    <span class="verif-value">{{ company.website|default:"None" }}</span>
+                </div>
+                <div class="verif-row">
+                    <span class="verif-label">Simulation Match:</span>
+                    <span class="verif-value" style="color: var(--emerald);">100% Legitimate Entity</span>
+                </div>
+            </div>
+
+            <div>
+                <button onclick="window.close()" class="btn-close">Return to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Document Viewer -->
+        <div class="document-panel">
+            <div class="doc-header">
+                <div class="doc-title-area">
+                    <span class="doc-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #e53935; fill: rgba(229, 57, 53, 0.1);">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </span>
+                    <div>
+                        <h2 class="doc-title">Official ICE Attestation</h2>
+                        <div class="doc-subtitle">Moroccan Government Verification Document (Modèle J)</div>
+                    </div>
+                </div>
+                {% if company.legal_document %}
+                <a href="{{ company.legal_document.url }}" target="_blank" class="btn-view-external" title="Open in a new tab">
+                    <span>Fullscreen View</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="pdf-frame-wrapper">
+                {% if company.legal_document %}
+                <iframe src="{{ company.legal_document.url }}" class="pdf-viewer">
+                    <p>Your browser does not support iframes. <a href="{{ company.legal_document.url }}">Download the PDF instead.</a></p>
+                </iframe>
+                {% else %}
+                <div class="no-doc-placeholder">
+                    <div class="placeholder-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="8" y1="13" x2="16" y2="13"></line>
+                            <line x1="8" y1="17" x2="16" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="placeholder-title">No Document Uploaded</div>
+                    <div class="placeholder-desc">
+                        This company has not uploaded their government attestation or Modèle J document during their registration.
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate a sleek professional scanning lookup
+        const spinner = document.getElementById('spinner');
+        const spinnerSuccess = document.getElementById('spinner-success');
+        const statusText = document.getElementById('status-text');
+        const results = document.getElementById('results');
+
+        const steps = [
+            { t: 600, text: "Verifying standard 15-digit ICE format..." },
+            { t: 1200, text: "Searching local mock registry for ICE: {{ company.ice }}..." },
+            { t: 1800, text: "Matching Registre du Commerce (RC) number: {{ company.rc_number }}..." },
+            { t: 2300, text: "Verification complete! Entity status matching ACTIVE." }
+        ];
+
+        steps.forEach(step => {
+            setTimeout(() => {
+                statusText.textContent = step.text;
+            }, step.t);
+        });
+
+        setTimeout(() => {
+            spinner.style.display = 'none';
+            spinnerSuccess.style.display = 'inline-flex';
+            results.style.display = 'block';
+        }, 2500);
+    </script>
+</body>
+</html>

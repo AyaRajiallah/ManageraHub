@@ -24,6 +24,8 @@
 *::before,
 *::after {
     box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 html {
@@ -46,7 +48,13 @@ svg {
 
 a {
     color: inherit;
-    text-decoration: none;
+    text-decoration: none !important;
+}
+
+a:hover,
+a:focus,
+a:active {
+    text-decoration: none !important;
 }
 
 button,
@@ -578,6 +586,7 @@ body.menu-open {
     font-size: 0.72rem;
 }
 
+
 .about-info-card h3 {
     font-size: clamp(1.45rem, 2.4vw, 2rem);
     line-height: 0.92;
@@ -963,21 +972,7 @@ body.menu-open {
     }
 }
 
-@media (max-width: 760px) {
-    .landing-shell {
-        width: min(96vw, 100%);
-        padding: 0;
-        border-radius: 0;
-        min-height: calc(100vh - 24px);
-    }
-
-    .hero-panel,
-    .story-card,
-    .service-card,
-    .admin-card {
-        border-radius: 24px;
-    }
-
+@media (max-width: 1024px) {
     .topbar {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -993,22 +988,66 @@ body.menu-open {
     .topnav {
         display: none;
         grid-column: 1 / -1;
-        margin-top: 6px;
-        padding: 8px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.7);
-        border: 1px solid var(--line-soft);
-        flex-wrap: wrap;
-        gap: 8px;
+        width: 100% !important;
+        margin-top: 10px !important;
+        padding: 12px 10px !important;
+        border-radius: 20px !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(79, 12, 40, 0.1) !important;
+        box-shadow: 0 10px 30px rgba(79, 12, 40, 0.08) !important;
+        flex-direction: column !important;
+        gap: 6px !important;
     }
 
     .topnav.is-open {
-        display: flex;
+        display: flex !important;
+    }
+
+    .topnav a {
+        display: flex !important;
+        align-items: center !important;
+        min-height: 40px !important;
+        padding: 0 18px !important;
+        border-radius: var(--radius-pill) !important;
+        background: rgba(79, 12, 40, 0.02) !important;
+        border: 1px solid rgba(79, 12, 40, 0.04) !important;
+        color: var(--text-soft) !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .topnav a:hover,
+    .topnav a:focus-visible {
+        color: var(--plum) !important;
+        background: rgba(79, 12, 40, 0.06) !important;
+        border-color: rgba(79, 12, 40, 0.14) !important;
+        transform: translateX(4px) !important;
     }
 
     .topbar-group-right,
     .topbar-group-left {
         display: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .landing-shell {
+        width: min(96vw, 100%);
+        padding: 0;
+        border-radius: 0;
+        min-height: calc(100vh - 24px);
+    }
+
+    .hero-panel,
+    .story-card,
+    .service-card,
+    .admin-card {
+        border-radius: 24px;
     }
 
     .hero-title {
@@ -2021,7 +2060,7 @@ body.menu-open {
     margin-bottom: 12px;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1024px) {
     .candidate-layout,
     .candidate-content-grid {
         grid-template-columns: 1fr;
@@ -2060,18 +2099,65 @@ body.menu-open {
     }
 
     .candidate-topbar-main {
-        align-items: flex-start;
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 12px !important;
     }
 
     .candidate-topbar-left {
-        flex-direction: column;
-        align-items: stretch;
+        display: contents !important;
+    }
+
+    .sidebar-toggle-hamburger {
+        order: 1 !important;
+        margin-right: 0 !important;
+    }
+
+    .candidate-brand-link {
+        order: 2 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        gap: 8px !important;
+    }
+
+    .candidate-brand-name {
+        font-size: 0.68rem !important;
+        letter-spacing: 0.08em !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .candidate-user-pill {
+        order: 3 !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .candidate-progress-pill-copy {
+        display: none !important;
+    }
+
+    .candidate-user-avatar {
+        margin: 0 !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 0.85rem !important;
     }
 
     .candidate-navbar-search,
     .candidate-navbar-search:focus-within {
-        width: 100%;
+        order: 4 !important;
+        width: 100% !important;
+        margin-top: 4px !important;
     }
 
     .candidate-topnav {
@@ -2080,11 +2166,6 @@ body.menu-open {
 
     .candidate-topbar-filters {
         padding-left: 0;
-    }
-
-    .candidate-user-pill {
-        width: 100%;
-        max-width: 320px;
     }
 
     .candidate-stats-grid,
@@ -2960,7 +3041,7 @@ body.menu-open {
     gap: 8px 14px;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1024px) {
     .candidate-profile-header-body {
         grid-template-columns: 1fr;
     }
@@ -3382,4 +3463,135 @@ body.menu-open {
     .candidate-jobs-results-card {
         padding: 18px;
     }
+}
+
+/* === Universal Responsive Sidebar Slide-out Drawer (Tablets & Mobiles) === */
+
+/* Sidebar Hamburger Toggle Button */
+.sidebar-toggle-hamburger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--plum);
+    border-radius: 50%;
+    transition: background 0.15s;
+    margin-right: 12px;
+}
+
+.company-theme .sidebar-toggle-hamburger {
+    color: #5a5d4a;
+}
+
+.sidebar-toggle-hamburger:hover {
+    background: rgba(79, 12, 40, 0.08);
+}
+
+.company-theme .sidebar-toggle-hamburger:hover {
+    background: rgba(90, 93, 74, 0.08);
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 34, 48, 0.42);
+    z-index: 9998;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    animation: fadeInOverlay 0.25s ease;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+@media (max-width: 1024px) {
+    .sidebar-toggle-hamburger {
+        display: inline-flex !important;
+    }
+    
+    .sidebar-open .sidebar-overlay {
+        display: block !important;
+    }
+    
+    /* Transition the sidebar into a gorgeous slide-out card drawer */
+    .candidate-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: -340px !important;
+        width: 320px !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background: rgba(255, 253, 249, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        box-shadow: 6px 0 30px rgba(79, 12, 40, 0.15) !important;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        margin: 0 !important;
+        border-radius: 0 24px 24px 0 !important;
+        padding: 30px 24px !important;
+        overflow-y: auto !important;
+        border: none !important;
+    }
+    
+    .company-theme .candidate-sidebar {
+        background: rgba(244, 245, 240, 0.98) !important;
+        box-shadow: 6px 0 30px rgba(90, 93, 74, 0.15) !important;
+    }
+    
+    .sidebar-open .candidate-sidebar {
+        left: 0 !important;
+    }
+    
+    /* Make the layout collapse to single column, hiding the empty placeholder space */
+    .candidate-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Streamline Header under 1024px: Hide Topnav from top bar */
+    .candidate-topnav {
+        display: none !important;
+    }
+
+    /* Render Topnav inside Collapsible Sidebar drawer instead */
+    .candidate-sidebar-nav-mobile {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        margin-bottom: 24px !important;
+        border-bottom: 1px solid rgba(79, 12, 40, 0.08) !important;
+        padding-bottom: 18px !important;
+        width: 100% !important;
+    }
+
+    .company-theme .candidate-sidebar-nav-mobile {
+        border-bottom-color: rgba(90, 93, 74, 0.08) !important;
+    }
+}
+
+/* Base Mobile Sidebar Nav - Hide by default on desktop */
+.candidate-sidebar-nav-mobile {
+    display: none;
+}
+
+/* Ensure mobile nav links are always shown inside the drawer when the drawer is open */
+.sidebar-open .candidate-sidebar-nav-mobile {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-bottom: 24px !important;
+    border-bottom: 1px solid rgba(79, 12, 40, 0.08) !important;
+    padding-bottom: 18px !important;
+    width: 100% !important;
+}
+
+.company-theme.sidebar-open .candidate-sidebar-nav-mobile {
+    border-bottom-color: rgba(90, 93, 74, 0.08) !important;
 }

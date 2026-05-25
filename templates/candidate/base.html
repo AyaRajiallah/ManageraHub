@@ -124,10 +124,88 @@
 
         <div class="candidate-layout">
             <aside class="candidate-sidebar">
-                <div class="candidate-side-note">
-                    <p class="candidate-card-kicker">Candidate summary</p>
-                    <h3>{{ candidate_stats.applications }} application{{ candidate_stats.applications|pluralize }}</h3>
-                    <p>{{ candidate_stats.saved_docs }} private document{{ candidate_stats.saved_docs|pluralize }} saved and {{ candidate_stats.recent_jobs }} active job offer{{ candidate_stats.recent_jobs|pluralize }} available right now.</p>
+                <!-- Mobile Navigation Links (Visible only on Mobile/Tablet) -->
+                <nav class="candidate-sidebar-nav-mobile" aria-label="Mobile navigation">
+                    {% for item in candidate_nav_items %}
+                    <a href="{{ item.url }}" class="candidate-side-link{% if active_section == item.key %} is-active{% endif %}">{{ item.label }}</a>
+                    {% endfor %}
+                </nav>
+
+                <div class="candidate-side-note" data-application-tracker>
+                    <div class="candidate-tracker-head">
+                        <div>
+                            <p class="candidate-card-kicker">Candidate summary</p>
+                            <h3>Application Tracker</h3>
+                        </div>
+                        {% if candidate_application_tracker|length > 1 %}
+                        <div class="candidate-tracker-arrows" aria-label="Application tracker navigation">
+                            <button type="button" class="candidate-tracker-arrow" data-tracker-prev aria-label="Previous application">&lsaquo;</button>
+                            <button type="button" class="candidate-tracker-arrow" data-tracker-next aria-label="Next application">&rsaquo;</button>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if candidate_application_tracker %}
+                    <div class="candidate-tracker-carousel" data-tracker-carousel>
+                        <div class="candidate-tracker-track" data-tracker-track>
+                            {% for application in candidate_application_tracker %}
+                            <article class="candidate-tracker-card">
+                                <div class="candidate-tracker-card-top">
+                                    <p class="candidate-tracker-job">{{ application.job_title }}</p>
+                                    <span class="candidate-tracker-company">{{ application.company_name }}</span>
+                                    <span class="candidate-tracker-date">Applied on {{ application.submitted_at|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="candidate-tracker-timeline">
+                                    <div class="candidate-tracker-rail" aria-hidden="true">
+                                        <svg class="candidate-tracker-curve" viewBox="0 0 44 244" preserveAspectRatio="none">
+                                            <path d="M22 24 C14 42 14 58 22 76 C30 94 30 110 22 128 C14 146 14 162 22 180 C30 198 30 216 22 232 C18 236 18 238 22 240"></path>
+                                        </svg>
+                                        {% for step in application.steps %}
+                                        <span class="candidate-tracker-rail-dot is-{{ step.state }}"></span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="candidate-tracker-steps">
+                                        {% for step in application.steps %}
+                                        <div class="candidate-tracker-step is-{{ step.state }}">
+                                            <div class="candidate-tracker-copy">
+                                                <strong>{{ step.label }}</strong>
+                                                <span>
+                                                    {% if step.state == "completed" %}
+                                                    Completed
+                                                    {% elif step.state == "current" %}
+                                                    Current step
+                                                    {% else %}
+                                                    Upcoming
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% if candidate_application_tracker|length > 1 %}
+                    <div class="candidate-tracker-dots" data-tracker-dots>
+                        {% for application in candidate_application_tracker %}
+                        <button
+                            type="button"
+                            class="candidate-tracker-dot-nav{% if forloop.first %} is-active{% endif %}"
+                            data-tracker-dot
+                            data-tracker-index="{{ forloop.counter0 }}"
+                            aria-label="Go to application {{ forloop.counter }}"
+                        ></button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="candidate-tracker-empty">
+                        <strong>No applications yet</strong>
+                        <p>Your future application timeline will appear here as soon as you apply to a job.</p>
+                    </div>
+                    {% endif %}
                 </div>
             </aside>
 
@@ -137,4 +215,394 @@
         </div>
     </div>
 </div>
+
+<style>
+    .candidate-layout {
+        grid-template-columns: minmax(330px, 380px) minmax(0, 1fr);
+        gap: 22px;
+    }
+
+    .candidate-sidebar,
+    .candidate-side-note,
+    .candidate-tracker-carousel,
+    .candidate-tracker-track,
+    .candidate-tracker-card {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .candidate-side-note {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-height: 600px;
+        padding-top: 28px;
+    }
+
+    .candidate-tracker-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.9rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .candidate-tracker-head h3 {
+        margin: 0.15rem 0 0;
+        color: #4d1830;
+        line-height: 1.06;
+        max-width: 11ch;
+    }
+
+    .candidate-tracker-arrows {
+        display: inline-flex;
+        gap: 0.5rem;
+        padding-top: 0.05rem;
+    }
+
+    .candidate-tracker-arrow,
+    .candidate-tracker-dot-nav {
+        border: 0;
+        cursor: pointer;
+    }
+
+    .candidate-tracker-arrow {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        color: #4d1830;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: 0 12px 26px rgba(104, 31, 61, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        transition: transform 0.2s ease, background 0.2s ease;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .candidate-tracker-arrow:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.92);
+    }
+
+    .candidate-tracker-carousel {
+        display: flex;
+        flex: 1 1 auto;
+        align-items: stretch;
+        overflow: hidden;
+        margin-top: 0.7rem;
+        width: 100%;
+    }
+
+    .candidate-tracker-track {
+        display: flex;
+        flex: 1 1 auto;
+        transition: transform 0.36s ease;
+        will-change: transform;
+        touch-action: pan-y;
+        width: 100%;
+    }
+
+    .candidate-tracker-card {
+        min-width: 100%;
+        width: 100%;
+        padding: 1.1rem 1rem 0.9rem;
+        border-radius: 22px;
+        background:
+            linear-gradient(160deg, rgba(104, 31, 61, 0.08), rgba(255, 255, 255, 0.72) 34%, rgba(240, 245, 234, 0.92) 100%),
+            rgba(255, 255, 255, 0.46);
+        border: 1px solid rgba(255, 255, 255, 0.46);
+        box-shadow: 0 18px 42px rgba(104, 31, 61, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        height: 100%;
+        min-height: 410px;
+    }
+
+    .candidate-tracker-card-top {
+        display: grid;
+        gap: 0.32rem;
+        margin-bottom: 1rem;
+    }
+
+    .candidate-tracker-job {
+        margin: 0;
+        color: #4d1830;
+        font-weight: 700;
+        line-height: 1.25;
+        font-size: 0.9rem;
+        overflow-wrap: anywhere;
+    }
+
+    .candidate-tracker-company,
+    .candidate-tracker-date {
+        color: #675a71;
+        font-size: 0.82rem;
+    }
+
+    .candidate-tracker-timeline {
+        position: relative;
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 0.95rem;
+        min-height: 244px;
+        height: 100%;
+        align-items: start;
+    }
+
+    .candidate-tracker-rail {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .candidate-tracker-curve {
+        position: absolute;
+        inset: 0;
+        width: 46px;
+        height: 100%;
+        overflow: visible;
+    }
+
+    .candidate-tracker-curve path {
+        fill: none;
+        stroke: rgba(104, 31, 61, 0.28);
+        stroke-width: 1.7;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .candidate-tracker-rail-dot {
+        position: absolute;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 5px rgba(104, 31, 61, 0.07);
+        background: rgba(183, 168, 177, 0.72);
+        transform: translateY(-50%);
+    }
+
+    .candidate-tracker-rail-dot:nth-child(2) { top: 24px; left: 22px; }
+    .candidate-tracker-rail-dot:nth-child(3) { top: 76px; left: 22px; }
+    .candidate-tracker-rail-dot:nth-child(4) { top: 128px; left: 22px; }
+    .candidate-tracker-rail-dot:nth-child(5) { top: 180px; left: 22px; }
+    .candidate-tracker-rail-dot:nth-child(6) { top: 232px; left: 22px; }
+
+    .candidate-tracker-steps {
+        position: relative;
+        display: grid;
+        gap: 0;
+        grid-template-rows: repeat(5, 52px);
+        align-content: start;
+        padding: 0;
+    }
+
+    .candidate-tracker-step {
+        position: relative;
+        min-height: 52px;
+        padding-left: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .candidate-tracker-copy {
+        display: grid;
+        gap: 0.14rem;
+    }
+
+    .candidate-tracker-copy strong {
+        color: #4d1830;
+        font-size: 0.86rem;
+        line-height: 1.22;
+        overflow-wrap: anywhere;
+    }
+
+    .candidate-tracker-copy span {
+        color: #7c7284;
+        font-size: 0.76rem;
+    }
+
+    .candidate-tracker-rail-dot.is-completed {
+        background: #8c3a5b;
+    }
+
+    .candidate-tracker-rail-dot.is-current {
+        width: 15px;
+        height: 15px;
+        background: #681f3d;
+        box-shadow: 0 0 0 6px rgba(104, 31, 61, 0.14);
+    }
+
+    .candidate-tracker-step.is-current .candidate-tracker-copy strong {
+        color: #681f3d;
+    }
+
+    .candidate-tracker-rail-dot.is-upcoming {
+        background: rgba(213, 198, 206, 0.88);
+        box-shadow: 0 0 0 6px rgba(104, 31, 61, 0.04);
+    }
+
+    .candidate-tracker-step.is-upcoming .candidate-tracker-copy strong,
+    .candidate-tracker-step.is-upcoming .candidate-tracker-copy span {
+        color: #a69aaa;
+    }
+
+    .candidate-tracker-dots {
+        display: flex;
+        flex-shrink: 0;
+        justify-content: center;
+        gap: 0.45rem;
+        margin-top: 0.5rem;
+    }
+
+    .candidate-tracker-dot-nav {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: rgba(104, 31, 61, 0.18);
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .candidate-tracker-dot-nav.is-active {
+        background: #681f3d;
+        transform: scale(1.15);
+    }
+
+    .candidate-tracker-empty {
+        margin-top: 1rem;
+        padding: 1rem 1.1rem;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.6);
+        color: #675a71;
+    }
+
+    .candidate-tracker-empty strong {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: #4d1830;
+    }
+
+    @media (max-width: 900px) {
+        .candidate-layout {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .candidate-side-note {
+            min-height: auto;
+            padding-top: 24px;
+        }
+
+        .candidate-tracker-head {
+            align-items: center;
+        }
+
+        .candidate-tracker-card {
+            padding: 0.9rem;
+            min-height: 420px;
+        }
+
+        .candidate-tracker-timeline {
+            grid-template-columns: 46px 1fr;
+            min-height: 244px;
+            gap: 0.55rem;
+        }
+
+        .candidate-tracker-curve {
+            width: 44px;
+        }
+
+        .candidate-tracker-rail-dot:nth-child(2) { top: 24px; left: 22px; }
+        .candidate-tracker-rail-dot:nth-child(3) { top: 76px; left: 22px; }
+        .candidate-tracker-rail-dot:nth-child(4) { top: 128px; left: 22px; }
+        .candidate-tracker-rail-dot:nth-child(5) { top: 180px; left: 22px; }
+        .candidate-tracker-rail-dot:nth-child(6) { top: 232px; left: 22px; }
+
+        .candidate-tracker-steps {
+            grid-template-rows: repeat(5, 52px);
+            gap: 0;
+        }
+
+        .candidate-tracker-copy {
+            gap: 0.12rem;
+        }
+
+        .candidate-tracker-copy strong {
+            font-size: 0.82rem;
+            line-height: 1.2;
+        }
+
+        .candidate-tracker-copy span {
+            font-size: 0.74rem;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        const carousel = document.querySelector('[data-tracker-carousel]');
+        const track = document.querySelector('[data-tracker-track]');
+
+        if (!carousel || !track) {
+            return;
+        }
+
+        const cards = Array.from(track.children);
+        const prevButton = document.querySelector('[data-tracker-prev]');
+        const nextButton = document.querySelector('[data-tracker-next]');
+        const dots = Array.from(document.querySelectorAll('[data-tracker-dot]'));
+        let currentIndex = 0;
+        let startX = 0;
+        let deltaX = 0;
+
+        function updateTracker(index) {
+            currentIndex = Math.max(0, Math.min(index, cards.length - 1));
+            track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+            dots.forEach(function (dot, dotIndex) {
+                dot.classList.toggle('is-active', dotIndex === currentIndex);
+            });
+            if (prevButton) {
+                prevButton.disabled = currentIndex === 0;
+            }
+            if (nextButton) {
+                nextButton.disabled = currentIndex === cards.length - 1;
+            }
+        }
+
+        if (prevButton) {
+            prevButton.addEventListener('click', function () {
+                updateTracker(currentIndex - 1);
+            });
+        }
+
+        if (nextButton) {
+            nextButton.addEventListener('click', function () {
+                updateTracker(currentIndex + 1);
+            });
+        }
+
+        dots.forEach(function (dot) {
+            dot.addEventListener('click', function () {
+                updateTracker(Number(dot.getAttribute('data-tracker-index')));
+            });
+        });
+
+        track.addEventListener('touchstart', function (event) {
+            startX = event.touches[0].clientX;
+            deltaX = 0;
+        }, { passive: true });
+
+        track.addEventListener('touchmove', function (event) {
+            deltaX = event.touches[0].clientX - startX;
+        }, { passive: true });
+
+        track.addEventListener('touchend', function () {
+            if (Math.abs(deltaX) > 40) {
+                updateTracker(currentIndex + (deltaX < 0 ? 1 : -1));
+            }
+        });
+
+        updateTracker(0);
+        alignTrackerToQuiz();
+    }());
+</script>
 {% endblock %}

@@ -113,6 +113,11 @@ class CompanyProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Moroccan Legal Verification Fields
+    ice = models.CharField(max_length=15, blank=True, null=True, verbose_name="ICE (15 digits)")
+    rc_number = models.CharField(max_length=50, blank=True, null=True, verbose_name="Registre du Commerce (RC)")
+    legal_document = models.FileField(upload_to=company_profile_file_path, blank=True, null=True)
+
     class Meta:
         ordering = ["company_name", "user__username"]
 
@@ -134,8 +139,11 @@ class CompanyProfile(models.Model):
             bool(self.website),
             bool(self.description.strip()),
             bool(self.logo),
+            bool(self.ice and len(self.ice.strip()) == 15),
+            bool(self.legal_document),
         ]
         return int((sum(fields) / len(fields)) * 100)
+
 
 
 class JobOffer(models.Model):

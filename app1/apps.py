@@ -18,14 +18,14 @@ class App1Config(AppConfig):
 
         try:
             from allauth.socialaccount.models import SocialAccount, SocialApp, SocialToken
-            admin.site.unregister(SocialAccount)
-            admin.site.unregister(SocialApp)
-            admin.site.unregister(SocialToken)
+            # admin.site.unregister(SocialAccount)
+            # admin.site.unregister(SocialApp)
+            # admin.site.unregister(SocialToken)
         except Exception:
             pass
 
         try:
             from django.contrib.sites.models import Site
-            admin.site.unregister(Site)
+            # admin.site.unregister(Site)
         except Exception:
             pass

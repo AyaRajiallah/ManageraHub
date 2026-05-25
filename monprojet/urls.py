@@ -6,6 +6,7 @@ from django.urls import include, path
 from app1.views import (
     account_logout_view,
     admin_approve_company_view,
+    admin_verify_company_offline_view,
     admin_login_view,
     admin_logout_view,
     admin_reject_company_view,
@@ -80,6 +81,7 @@ urlpatterns = [
     path('company/applications/<int:application_id>/', company_application_detail_view, name='company_application_detail'),
     path('admin/approve-company/<int:company_id>/', admin_approve_company_view, name='admin_approve_company'),
     path('admin/reject-company/<int:company_id>/', admin_reject_company_view, name='admin_reject_company'),
+    path('admin/verify-company-offline/<int:company_id>/', admin_verify_company_offline_view, name='admin_verify_company_offline'),
     path('admin/', admin.site.urls),
 ]
 

@@ -182,6 +182,57 @@
             </div>
         </section>
 
+        <!-- Legal Verification (ICE & RC) -->
+        <section class="candidate-profile-section-card" data-profile-section>
+            <div class="candidate-profile-section-head">
+                <div>
+                    <h3>Legal identity & verification</h3>
+                    <p>Moroccan ICE, RC numbers, and Modèle J registration files.</p>
+                </div>
+                <div class="candidate-profile-section-actions">
+                    <button type="button" class="candidate-profile-section-icon" data-profile-edit-toggle aria-expanded="false" aria-controls="section-legal">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17.2V21h3.8L18 9.8l-3.8-3.8L3 17.2zm17.7-10.4a1 1 0 0 0 0-1.4l-2.1-2.1a1 1 0 0 0-1.4 0l-1.6 1.6l3.8 3.8l1.3-1.9z" fill="currentColor"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="candidate-profile-section-view">
+                <div class="candidate-profile-inline-list" style="display:flex; flex-direction:column; gap:8px;">
+                    <p class="candidate-profile-view-copy"><strong>ICE (15 digits):</strong> {% if company_profile.ice %}<span style="font-family:monospace; font-weight:600; letter-spacing: 0.02em;">{{ company_profile.ice }}</span>{% else %}Not provided yet{% endif %}</p>
+                    <p class="candidate-profile-view-copy"><strong>RC Number:</strong> {% if company_profile.rc_number %}{{ company_profile.rc_number }}{% else %}Not provided yet{% endif %}</p>
+                    <p class="candidate-profile-view-copy"><strong>Legal Document (Modèle J):</strong> 
+                        {% if company_profile.legal_document %}
+                        <a href="{{ company_profile.legal_document.url }}" class="candidate-inline-link" target="_blank" style="margin-left: 6px;">Download uploaded document 📥</a>
+                        {% else %}
+                        No document uploaded
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="candidate-profile-section-edit" id="section-legal" hidden>
+                <div class="candidate-form-row">
+                    <div class="candidate-form-field">
+                        <label for="{{ form.ice.id_for_label }}">ICE (15 digits)</label>
+                        {{ form.ice }}
+                        {% if form.ice.errors %}<div class="candidate-form-error">{{ form.ice.errors|join:", " }}</div>{% endif %}
+                    </div>
+                    <div class="candidate-form-field">
+                        <label for="{{ form.rc_number.id_for_label }}">RC Number</label>
+                        {{ form.rc_number }}
+                        {% if form.rc_number.errors %}<div class="candidate-form-error">{{ form.rc_number.errors|join:", " }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="candidate-form-field" style="margin-top: 12px;">
+                    <label for="{{ form.legal_document.id_for_label }}">Legal Document (Modèle J)</label>
+                    {{ form.legal_document }}
+                    {% if form.legal_document.errors %}<div class="candidate-form-error">{{ form.legal_document.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="candidate-profile-section-edit-actions">
+                    <button type="submit" class="pill-button pill-button-dark candidate-submit-button">Save section</button>
+                    <button type="button" class="pill-button pill-button-light" data-profile-cancel>Edit later</button>
+                </div>
+            </div>
+        </section>
+
         <!-- Contact information -->
         <section class="candidate-profile-section-card" data-profile-section>
             <div class="candidate-profile-section-head">

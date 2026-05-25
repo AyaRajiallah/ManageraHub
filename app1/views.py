@@ -1,21 +1,370 @@
 from datetime import timedelta
+import math
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+import json
 
+from django.core.mail import send_mail
 from .forms import CandidateProfileForm, CompanyProfileForm, JobApplicationForm, JobOfferFilterForm, JobOfferForm, CompanyJobFilterForm, CompanyApplicationFilterForm
 from .models import CandidateProfile, CompanyProfile, JobApplication, JobOffer
 
 DEFAULT_CANDIDATE_DASHBOARD_URL = "/candidate/dashboard/"
 DEFAULT_COMPANY_DASHBOARD_URL = "/company/dashboard"
 User = get_user_model()
+
+QUIZ_COMPETENCIES = [
+    "Communication",
+    "Logic",
+    "Stress Management",
+    "Interview Readiness",
+    "Organization",
+    "Confidence",
+]
+
+QUIZ_QUESTIONS = [
+    {
+        "id": "communication_1",
+        "competency": "Communication",
+        "question": "During an interview, how should you clearly present an internship experience?",
+        "choices": [
+            "Only mention the company name.",
+            "Explain the context, your role, your actions, and the result.",
+            "Talk mostly about your hobbies.",
+            "Answer with one vague sentence.",
+        ],
+        "correct_index": 1,
+        "explanation": "A structured answer helps the recruiter understand your real impact and your communication style.",
+    },
+    {
+        "id": "communication_2",
+        "competency": "Communication",
+        "question": "If a question is unclear, what is the best response?",
+        "choices": [
+            "Make up an answer quickly.",
+            "Stay silent and say nothing.",
+            "Politely ask for clarification.",
+            "Change the topic.",
+        ],
+        "correct_index": 2,
+        "explanation": "Asking for clarification shows active listening and helps you avoid answering off-topic.",
+    },
+    {
+        "id": "logique_1",
+        "competency": "Logic",
+        "question": "One task takes 20 minutes. How long do 3 similar tasks take?",
+        "choices": [
+            "30 minutes",
+            "40 minutes",
+            "60 minutes",
+            "90 minutes",
+        ],
+        "correct_index": 2,
+        "explanation": "Three tasks of 20 minutes take 60 minutes when completed one after another.",
+    },
+    {
+        "id": "logique_2",
+        "competency": "Logic",
+        "question": "Which number best completes this sequence: 2, 4, 8, 16, ... ?",
+        "choices": [
+            "18",
+            "24",
+            "32",
+            "34",
+        ],
+        "correct_index": 2,
+        "explanation": "Each number doubles the previous one, so 16 x 2 = 32.",
+    },
+    {
+        "id": "stress_1",
+        "competency": "Stress Management",
+        "question": "You arrive for an interview and it is running 15 minutes late. What do you do?",
+        "choices": [
+            "Leave immediately.",
+            "Stay calm and wait professionally.",
+            "Post your frustration on social media.",
+            "Refuse to continue the interview.",
+        ],
+        "correct_index": 1,
+        "explanation": "Staying calm during a delay shows maturity and strong stress management.",
+    },
+    {
+        "id": "stress_2",
+        "competency": "Stress Management",
+        "question": "Before an important presentation, which action helps reduce stress the most?",
+        "choices": [
+            "Improvise everything.",
+            "Avoid reviewing the topic.",
+            "Practice and prepare key points.",
+            "Wait until the last minute to start.",
+        ],
+        "correct_index": 2,
+        "explanation": "Structured preparation reduces uncertainty and increases your sense of control.",
+    },
+    {
+        "id": "entretien_1",
+        "competency": "Interview Readiness",
+        "question": "Which response is most appropriate for the question 'Tell me about yourself'?",
+        "choices": [
+            "A brief introduction connected to your background and the target role.",
+            "A full story about your entire life.",
+            "Only your age and address.",
+            "No answer, to stay mysterious.",
+        ],
+        "correct_index": 0,
+        "explanation": "Recruiters expect a relevant summary of your background, strengths, and professional goal.",
+    },
+    {
+        "id": "entretien_2",
+        "competency": "Interview Readiness",
+        "question": "At the end of an interview, what best shows strong preparation?",
+        "choices": [
+            "Say you have no questions at all.",
+            "Ask a relevant question about the role or the team.",
+            "Ask only about vacation on the first minute.",
+            "Interrupt the recruiter.",
+        ],
+        "correct_index": 1,
+        "explanation": "A relevant question shows genuine interest and preparation.",
+    },
+    {
+        "id": "organisation_1",
+        "competency": "Organization",
+        "question": "You have 3 job applications to send this week. Which method is the most organized?",
+        "choices": [
+            "Wait until the last evening to do everything.",
+            "Create a list, set priorities, and schedule each submission.",
+            "Send the same message to everyone without reviewing it.",
+            "Write nothing down and rely on memory.",
+        ],
+        "correct_index": 1,
+        "explanation": "Planning and prioritizing help you keep quality high for each application.",
+    },
+    {
+        "id": "organisation_2",
+        "competency": "Organization",
+        "question": "What should you check before sending a job application?",
+        "choices": [
+            "Your CV and the company name in the message.",
+            "Only your profile photo.",
+            "Only today's date.",
+            "Nothing, speed matters most.",
+        ],
+        "correct_index": 0,
+        "explanation": "Checking the essentials helps you avoid mistakes the recruiter will notice immediately.",
+    },
+    {
+        "id": "confiance_1",
+        "competency": "Confidence",
+        "question": "When facing a difficult question, which attitude inspires the most confidence?",
+        "choices": [
+            "Calmly admit your limits, then propose an approach.",
+            "Pretend to know everything without explanation.",
+            "Apologize endlessly.",
+            "Avoid answering completely.",
+        ],
+        "correct_index": 0,
+        "explanation": "Healthy confidence combines honesty, calmness, and the ability to reason clearly.",
+    },
+    {
+        "id": "confiance_2",
+        "competency": "Confidence",
+        "question": "Which behavior strengthens confidence during an interview?",
+        "choices": [
+            "Speak very fast without pausing.",
+            "Maintain an open posture and a steady tone.",
+            "Look at the floor constantly.",
+            "Avoid all eye contact.",
+        ],
+        "correct_index": 1,
+        "explanation": "Posture and tone directly shape how confident you appear.",
+    },
+]
+
+
+def _build_quiz_radar_points(skill_scores):
+    center_x = 160
+    center_y = 160
+    radius = 108
+    total = len(QUIZ_COMPETENCIES)
+    points = []
+    axis_points = []
+    label_points = []
+    score_points = []
+    ring_polygons = []
+
+    for ring_ratio in (0.25, 0.5, 0.75, 1):
+        ring = []
+        for index, competency in enumerate(QUIZ_COMPETENCIES):
+            angle = -math.pi / 2 + (2 * math.pi * index / total)
+            ring_x = center_x + math.cos(angle) * radius * ring_ratio
+            ring_y = center_y + math.sin(angle) * radius * ring_ratio
+            ring.append(f"{ring_x:.2f},{ring_y:.2f}")
+        ring_polygons.append(" ".join(ring))
+
+    for index, competency in enumerate(QUIZ_COMPETENCIES):
+        angle = -math.pi / 2 + (2 * math.pi * index / total)
+        outer_x = center_x + math.cos(angle) * radius
+        outer_y = center_y + math.sin(angle) * radius
+        value_ratio = max(0, min(skill_scores.get(competency, 0), 100)) / 100
+        score_x = center_x + math.cos(angle) * radius * value_ratio
+        score_y = center_y + math.sin(angle) * radius * value_ratio
+        label_x = center_x + math.cos(angle) * (radius + 26)
+        label_y = center_y + math.sin(angle) * (radius + 26)
+        points.append(f"{score_x:.2f},{score_y:.2f}")
+        axis_points.append((center_x, center_y, outer_x, outer_y))
+        score_points.append({"x": f"{score_x:.2f}", "y": f"{score_y:.2f}"})
+        label_points.append(
+            {
+                "label": competency,
+                "score": skill_scores.get(competency, 0),
+                "x": f"{label_x:.2f}",
+                "y": f"{label_y:.2f}",
+                "anchor": "middle" if abs(label_x - center_x) < 12 else ("start" if label_x > center_x else "end"),
+            }
+        )
+
+    return {
+        "polygon_points": " ".join(points),
+        "axis_points": axis_points,
+        "score_points": score_points,
+        "label_points": label_points,
+        "ring_polygons": ring_polygons,
+        "center_x": center_x,
+        "center_y": center_y,
+    }
+
+
+def _skill_level(score):
+    if score >= 75:
+        return "Strong"
+    if score >= 45:
+        return "Average"
+    return "Weak"
+
+
+def _build_skill_network(skill_scores):
+    teamwork_score = int(round((skill_scores["Communication"] + skill_scores["Organization"]) / 2))
+    technical_score = int(round((skill_scores["Logic"] + skill_scores["Interview Readiness"]) / 2))
+
+    network_scores = {
+        "Communication": skill_scores["Communication"],
+        "Interview Readiness": skill_scores["Interview Readiness"],
+        "Teamwork": teamwork_score,
+        "Logic": skill_scores["Logic"],
+        "Stress Management": skill_scores["Stress Management"],
+        "Confidence": skill_scores["Confidence"],
+        "Organization": skill_scores["Organization"],
+        "Technical Skills": technical_score,
+    }
+
+    nodes = []
+    for label, score in network_scores.items():
+        level = _skill_level(score)
+        radius = 34 if level == "Strong" else 27 if level == "Average" else 21
+        nodes.append(
+            {
+                "id": label.lower().replace(" ", "_"),
+                "label": label,
+                "score": score,
+                "level": level,
+                "radius": radius,
+            }
+        )
+
+    edges = [
+        {"source": "communication", "target": "teamwork"},
+        {"source": "communication", "target": "interview_readiness"},
+        {"source": "interview_readiness", "target": "confidence"},
+        {"source": "confidence", "target": "stress_management"},
+        {"source": "logic", "target": "technical_skills"},
+        {"source": "organization", "target": "teamwork"},
+        {"source": "organization", "target": "stress_management"},
+    ]
+
+    strongest_skill = max(network_scores, key=network_scores.get)
+    weakest_skill = min(network_scores, key=network_scores.get)
+    average_total = sum(network_scores.values()) / len(network_scores)
+    main_cluster = "Interview & Soft Skills" if average_total >= 55 else "Foundational Growth"
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "summary": {
+            "node_count": len(nodes),
+            "edge_count": len(edges),
+            "strongest_skill": strongest_skill,
+            "weakest_skill": weakest_skill,
+            "main_cluster": main_cluster,
+        },
+        "json": json.dumps({"nodes": nodes, "edges": edges}, cls=DjangoJSONEncoder),
+    }
+
+
+def _build_candidate_quiz_state(request):
+    correction_rows = []
+    skill_totals = {competency: {"correct": 0, "total": 0} for competency in QUIZ_COMPETENCIES}
+
+    for question in QUIZ_QUESTIONS:
+        submitted = request.POST.get(question["id"], "").strip()
+        skill_totals[question["competency"]]["total"] += 1
+        is_correct = submitted == str(question["correct_index"])
+        if is_correct:
+            skill_totals[question["competency"]]["correct"] += 1
+        correction_rows.append(
+            {
+                **question,
+                "submitted": submitted,
+                "correct_choice": question["choices"][question["correct_index"]],
+                "submitted_choice": question["choices"][int(submitted)] if submitted.isdigit() and int(submitted) < len(question["choices"]) else "",
+                "is_correct": is_correct,
+            }
+        )
+
+    skill_scores = {
+        competency: int(round((values["correct"] / values["total"]) * 100)) if values["total"] else 0
+        for competency, values in skill_totals.items()
+    }
+    total_correct = sum(values["correct"] for values in skill_totals.values())
+    total_questions = sum(values["total"] for values in skill_totals.values())
+    total_score = int(round((total_correct / total_questions) * 100)) if total_questions else 0
+    skill_network = _build_skill_network(skill_scores)
+
+    return {
+        "questions": correction_rows,
+        "is_submitted": True,
+        "skill_scores": skill_scores,
+        "total_score": total_score,
+        "total_correct": total_correct,
+        "total_questions": total_questions,
+        "radar_chart": _build_quiz_radar_points(skill_scores),
+        "skill_network": skill_network,
+    }
+
+
+def _candidate_quiz_context(request):
+    initial_questions = [{**question, "submitted": "", "is_correct": False} for question in QUIZ_QUESTIONS]
+    base_state = {
+        "questions": initial_questions,
+        "is_submitted": False,
+        "skill_scores": {competency: 0 for competency in QUIZ_COMPETENCIES},
+        "total_score": None,
+        "total_correct": 0,
+        "total_questions": len(QUIZ_QUESTIONS),
+        "radar_chart": _build_quiz_radar_points({competency: 0 for competency in QUIZ_COMPETENCIES}),
+        "skill_network": None,
+    }
+    if request.method == "POST" and request.POST.get("candidate_quiz_submit") == "1":
+        return _build_candidate_quiz_state(request)
+    return base_state
 
 
 def home(request):
@@ -86,13 +435,18 @@ def _create_company_profile(user, **extra_fields):
         "company_size": extra_fields.get("company_size", "").strip(),
         "website": extra_fields.get("website", "").strip(),
         "description": extra_fields.get("description", "").strip(),
+        "ice": extra_fields.get("ice", "").strip() if extra_fields.get("ice") else None,
+        "rc_number": extra_fields.get("rc_number", "").strip() if extra_fields.get("rc_number") else None,
+        "legal_document": extra_fields.get("legal_document"),
     }
     profile, created = CompanyProfile.objects.get_or_create(user=user, defaults=defaults)
     if not created:
         changed = False
         updated_fields = []
         for field_name, value in defaults.items():
-            if value and not getattr(profile, field_name):
+            # Treat FileField correctly
+            if value is not None and not getattr(profile, field_name):
+
                 setattr(profile, field_name, value)
                 changed = True
                 updated_fields.append(field_name)
@@ -134,9 +488,60 @@ def _candidate_nav_items():
     ]
 
 
+def _candidate_application_tracker_items(user):
+    applications = (
+        JobApplication.objects.filter(candidate=user)
+        .select_related("job_offer")
+        .order_by("-submitted_at")
+    )
+
+    tracker_items = []
+    for application in applications:
+        final_label = "Final Decision"
+
+        steps = [
+            {"label": "Application Sent", "state": "upcoming"},
+            {"label": "Application Viewed", "state": "upcoming"},
+            {"label": "Under Review", "state": "upcoming"},
+            {"label": "Interview Scheduled", "state": "upcoming"},
+            {"label": final_label, "state": "upcoming"},
+        ]
+
+        if application.status == "sent":
+            steps[0]["state"] = "current"
+        elif application.status == "under_review":
+            steps[0]["state"] = "completed"
+            steps[1]["state"] = "completed"
+            steps[2]["state"] = "current"
+        elif application.status == "interview_scheduled":
+            steps[0]["state"] = "completed"
+            steps[1]["state"] = "completed"
+            steps[2]["state"] = "completed"
+            steps[3]["state"] = "current"
+        elif application.status in {"accepted", "rejected"}:
+            steps[0]["state"] = "completed"
+            steps[1]["state"] = "completed"
+            steps[2]["state"] = "completed"
+            steps[3]["state"] = "completed"
+            steps[4]["state"] = "current"
+
+        tracker_items.append(
+            {
+                "job_title": application.job_offer.title,
+                "company_name": application.job_offer.company_name,
+                "submitted_at": application.submitted_at,
+                "status_label": application.get_status_display(),
+                "steps": steps,
+            }
+        )
+
+    return tracker_items
+
+
 def _candidate_base_context(request, active_key):
     profile = _ensure_candidate_profile(request.user)
     application_count = JobApplication.objects.filter(candidate=request.user).count()
+    tracker_items = _candidate_application_tracker_items(request.user)
     saved_docs_count = sum(
         1
         for field in [profile.cv_file, profile.cover_letter_file]
@@ -158,6 +563,7 @@ def _candidate_base_context(request, active_key):
             "saved_docs": saved_docs_count,
             "recent_jobs": JobOffer.objects.filter(is_active=True).count(),
         },
+        "candidate_application_tracker": tracker_items,
     }
 
 
@@ -309,12 +715,19 @@ def company_register_view(request):
         password = request.POST.get("password", "")
         confirm_password = request.POST.get("password_confirm", "")
 
+        # Legal Verification fields
+        ice = request.POST.get("ice", "").strip()
+        rc_number = request.POST.get("rc_number", "").strip()
+        legal_document = request.FILES.get("legal_document")
+
         if password != confirm_password:
             error_message = "Passwords do not match. Please try again."
         elif not email:
             error_message = "Email is required."
         elif not company_name:
             error_message = "Company name is required."
+        elif ice and (not ice.isdigit() or len(ice) != 15):
+            error_message = "The ICE number must contain exactly 15 digits."
         elif User.objects.filter(email__iexact=email).exists() or User.objects.filter(username__iexact=email).exists():
             error_message = "An account with this email already exists."
         else:
@@ -341,6 +754,9 @@ def company_register_view(request):
                     company_size=company_size,
                     website=website,
                     description=description,
+                    ice=ice,
+                    rc_number=rc_number,
+                    legal_document=legal_document,
                 )
                 return redirect(reverse("company_pending_approval"))
 
@@ -352,6 +768,7 @@ def company_register_view(request):
             "success_message": success_message,
         },
     )
+
 
 
 def _signin_view(request, selected_role=None):
@@ -447,6 +864,7 @@ def candidate_dashboard_view(request):
             ],
             "applications": applications,
             "recent_jobs": recent_jobs,
+            "candidate_quiz": _candidate_quiz_context(request),
         }
     )
     return render(request, "candidate/dashboard.html", context)
@@ -586,7 +1004,7 @@ def candidate_application_status_view(request):
 
 
 def candidate_quizzes_view(request):
-    return redirect(_candidate_dashboard_url())
+    return redirect(f"{_candidate_dashboard_url()}#candidate-quiz-lab")
 
 
 def candidate_network_view(request):
@@ -812,6 +1230,31 @@ def admin_approve_company_view(request, company_id):
     company = get_object_or_404(CompanyProfile, pk=company_id)
     company.is_approved = True
     company.save(update_fields=["is_approved"])
+    
+    # Send simulation email to console
+    subject = f"Your Company Account '{company.company_name}' has been APPROVED! ✦"
+    message = f"""Bonjour {company.user.first_name} {company.user.last_name},
+
+Félicitations! Your company account for '{company.company_name}' has been reviewed and APPROVED by our administration team.
+
+Here is your company profile details we verified:
+- ICE (Identifiant Commun): {company.ice or "Not provided"}
+- RC Number: {company.rc_number or "Not provided"}
+- City/Location: {company.city}, {company.country}
+
+You can now log in to the Company Portal and start posting job offers!
+Access here: http://127.0.0.1:8000/company/signin
+
+Best regards,
+The ManageraHub Admin Team (Morocco)
+"""
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [company.user.email],
+        fail_silently=True,
+    )
     return redirect("/admin/")
 
 
@@ -821,4 +1264,39 @@ def admin_reject_company_view(request, company_id):
     company = get_object_or_404(CompanyProfile, pk=company_id)
     company.is_approved = False
     company.save(update_fields=["is_approved"])
+    
+    # Send simulation email to console
+    subject = f"Update regarding your Company Account request for '{company.company_name}'"
+    message = f"""Bonjour {company.user.first_name} {company.user.last_name},
+
+Thank you for your interest in ManageraHub. 
+
+After reviewing the legal documents and details provided for '{company.company_name}', our administration team has rejected or deactivated your company profile.
+
+If you believe this was an error, please ensure your 15-digit ICE and Registre du Commerce (RC) numbers are correct and that you uploaded a valid Modèle J certificate.
+
+You can update your registration or get in touch with our support.
+
+Best regards,
+The ManageraHub Admin Team (Morocco)
+"""
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [company.user.email],
+        fail_silently=True,
+    )
     return redirect("/admin/")
+
+
+def admin_verify_company_offline_view(request, company_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect("/admin/login/")
+    company = get_object_or_404(CompanyProfile, pk=company_id)
+    ctx = {
+        "company": company,
+        "verified_at": timezone.now(),
+    }
+    return render(request, "admin/verify_company_offline.html", ctx)
+

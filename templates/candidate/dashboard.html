@@ -36,53 +36,136 @@
     </article>
 </section>
 
-<section class="candidate-content-grid">
-    <article class="candidate-panel-card candidate-panel-card-wide">
-        <p class="candidate-card-kicker">Profile completion</p>
-        <h2>What still needs attention?</h2>
-        {% if profile_missing_items %}
-        <div class="candidate-list-card">
-            {% for item in profile_missing_items %}
-            <div class="candidate-list-item">
-                <span>{{ item }}</span>
-                <a href="{% url 'candidate_profile' %}">Update</a>
+<section id="candidate-quiz-lab" class="candidate-panel-card candidate-panel-card-wide">
+    <p class="candidate-card-kicker">Candidate quiz</p>
+    <h2>Candidate Skills Quiz</h2>
+    <p>Interview &amp; Soft Skills QCM</p>
+
+    <section class="candidate-quiz-intro{% if candidate_quiz.is_submitted %} is-hidden{% endif %}" data-quiz-intro>
+        <div class="candidate-quiz-intro-glow"></div>
+        <div class="candidate-quiz-intro-copy">
+            <p class="candidate-card-kicker">Train smarter.</p>
+            <h3>Boost your interview skills.</h3>
+            <p>Practice communication, logic, confidence, and interview readiness with one clear radar summary at the end.</p>
+            <button type="button" class="pill-button pill-button-dark candidate-quiz-start" data-quiz-start>Start QCM</button>
+        </div>
+    </section>
+
+    <form method="post" class="candidate-quiz-form{% if not candidate_quiz.is_submitted %} is-hidden{% endif %}" data-quiz-form>
+        {% csrf_token %}
+        <input type="hidden" name="candidate_quiz_submit" value="1">
+        <div class="candidate-quiz-slider-head">
+            <button type="button" class="candidate-quiz-arrow" data-quiz-prev aria-label="Previous question">
+                <span aria-hidden="true">&lsaquo;</span>
+            </button>
+            <div class="candidate-quiz-progress">
+                <p class="candidate-card-kicker">Question Navigation</p>
+                <strong><span data-quiz-current>1</span> / {{ candidate_quiz.total_questions }}</strong>
             </div>
+            <button type="button" class="candidate-quiz-arrow" data-quiz-next aria-label="Next question">
+                <span aria-hidden="true">&rsaquo;</span>
+            </button>
+        </div>
+        <div class="candidate-quiz-list" data-quiz-slider>
+            {% for question in candidate_quiz.questions %}
+            <article class="candidate-quiz-card{% if not forloop.first %} is-hidden{% endif %}" data-quiz-slide data-quiz-index="{{ forloop.counter0 }}">
+                <div class="candidate-quiz-card-head">
+                    <div>
+                        <p class="candidate-card-kicker">{{ question.competency }}</p>
+                        <h3>{{ forloop.counter }}. {{ question.question }}</h3>
+                    </div>
+                    <span class="candidate-quiz-card-index">Q{{ forloop.counter }}</span>
+                </div>
+                <div class="candidate-quiz-options">
+                    {% for choice in question.choices %}
+                    <label class="candidate-quiz-option{% if candidate_quiz.is_submitted and forloop.counter0 == question.correct_index %} is-correct{% elif candidate_quiz.is_submitted and question.submitted == forloop.counter0|stringformat:'s' and forloop.counter0 != question.correct_index %} is-incorrect{% endif %}">
+                        <input
+                            type="radio"
+                            name="{{ question.id }}"
+                            value="{{ forloop.counter0 }}"
+                            {% if question.submitted == forloop.counter0|stringformat:"s" %}checked{% endif %}
+                            required
+                        >
+                        <span>{{ choice }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if candidate_quiz.is_submitted %}
+                <div class="candidate-quiz-feedback {% if question.is_correct %}is-success{% else %}is-warning{% endif %}">
+                    <strong>
+                        {% if question.is_correct %}
+                        Correct Answer
+                        {% else %}
+                        Correct answer: {{ question.correct_choice }}
+                        {% endif %}
+                    </strong>
+                    <p>{{ question.explanation }}</p>
+                </div>
+                {% endif %}
+            </article>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="candidate-placeholder-card">
-            <h3>Your profile is in a strong state.</h3>
-            <p>All major profile sections are filled in. You can still update documents or refresh your experience at any time.</p>
+        <div class="candidate-card-actions candidate-quiz-actions">
+            <button type="submit" class="pill-button pill-button-dark">Submit Quiz</button>
         </div>
-        {% endif %}
-    </article>
+    </form>
 
-    <article class="candidate-panel-card">
-        <p class="candidate-card-kicker">Quick links</p>
-        <div class="candidate-mini-links">
-            <a href="{% url 'candidate_profile' %}" class="candidate-inline-link">Edit my profile</a>
-            <a href="{% url 'candidate_job_offers' %}" class="candidate-inline-link">Search jobs</a>
-        </div>
-    </article>
-
-    <article class="candidate-panel-card">
-        <p class="candidate-card-kicker">Applications overview</p>
-        {% if applications %}
-        <div class="candidate-mini-stack">
-            {% for application in applications %}
-            <div class="candidate-mini-entry">
-                <strong>{{ application.job_offer.title }}</strong>
-                <span>{{ application.job_offer.company_name }} · {{ application.get_status_display }}</span>
+    {% if candidate_quiz.is_submitted %}
+    <section class="candidate-quiz-results" data-quiz-results>
+        <div class="candidate-quiz-network-card">
+            <div class="candidate-quiz-network-copy">
+                <p class="candidate-card-kicker">Skill Network</p>
+                <h3>Your quiz performance map</h3>
+                <p>Drag any node to explore how your strongest and weakest skills connect across the full interview readiness network.</p>
             </div>
-            {% endfor %}
+            <div class="candidate-quiz-network-stage">
+                <svg class="candidate-skill-network" viewBox="0 0 680 420" role="img" aria-label="Interactive skill network showing quiz performance by skill"></svg>
+            </div>
+            <div class="candidate-network-legend">
+                <span><i class="is-strong"></i>Strong</span>
+                <span><i class="is-average"></i>Average</span>
+                <span><i class="is-weak"></i>Weak</span>
+            </div>
         </div>
-        {% else %}
-        <p>You have not applied to a job yet. Start from the Job Offers page.</p>
-        {% endif %}
-    </article>
+        <div class="candidate-quiz-summary-card">
+            <p class="candidate-card-kicker">Graph Summary</p>
+            <h3>Digital interpretation of your quiz performance network</h3>
+            <div class="candidate-quiz-summary-grid">
+                <div class="candidate-quiz-summary-item">
+                    <span>Total score</span>
+                    <strong>{{ candidate_quiz.total_score }}%</strong>
+                </div>
+                <div class="candidate-quiz-summary-item">
+                    <span>Nodes</span>
+                    <strong>{{ candidate_quiz.skill_network.summary.node_count }}</strong>
+                </div>
+                <div class="candidate-quiz-summary-item">
+                    <span>Edges</span>
+                    <strong>{{ candidate_quiz.skill_network.summary.edge_count }}</strong>
+                </div>
+                <div class="candidate-quiz-summary-item">
+                    <span>Strongest skill</span>
+                    <strong>{{ candidate_quiz.skill_network.summary.strongest_skill }}</strong>
+                </div>
+                <div class="candidate-quiz-summary-item">
+                    <span>Weakest skill</span>
+                    <strong>{{ candidate_quiz.skill_network.summary.weakest_skill }}</strong>
+                </div>
+                <div class="candidate-quiz-summary-item">
+                    <span>Main skill cluster</span>
+                    <strong>{{ candidate_quiz.skill_network.summary.main_cluster }}</strong>
+                </div>
+            </div>
+            <div class="candidate-card-actions candidate-quiz-summary-actions">
+                <a href="{% url 'candidate_quizzes' %}" class="pill-button pill-button-dark">Retry</a>
+            </div>
+        </div>
+    </section>
+    <script id="candidate-skill-network-data" type="application/json">{{ candidate_quiz.skill_network.json|safe }}</script>
+    {% endif %}
 </section>
 
-<section class="candidate-panel-card candidate-panel-card-wide">
+<section class="candidate-panel-card candidate-panel-card-wide candidate-recent-jobs-panel">
     <p class="candidate-card-kicker">Recent jobs</p>
     <h2>Fresh opportunities</h2>
     <div class="candidate-job-grid">
@@ -109,4 +192,718 @@
         {% endfor %}
     </div>
 </section>
+
+<style>
+    .candidate-recent-jobs-panel {
+        width: calc(100% + clamp(330px, 24vw, 380px) + 22px);
+        margin-left: calc(-1 * (clamp(330px, 24vw, 380px) + 22px));
+    }
+
+    @media (max-width: 1024px) {
+        .candidate-recent-jobs-panel {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
+
+    .candidate-quiz-intro.is-hidden,
+    .candidate-quiz-form.is-hidden {
+        display: none;
+    }
+
+    .candidate-quiz-intro {
+        position: relative;
+        overflow: hidden;
+        margin-top: 1.5rem;
+        padding: 2rem;
+        border-radius: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.42);
+        background:
+            linear-gradient(140deg, rgba(104, 31, 61, 0.14), rgba(255, 255, 255, 0.5) 38%, rgba(236, 244, 227, 0.72) 100%),
+            rgba(255, 255, 255, 0.34);
+        box-shadow: 0 18px 48px rgba(104, 31, 61, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.58);
+        backdrop-filter: blur(10px);
+    }
+
+    .candidate-quiz-intro-glow {
+        position: absolute;
+        inset: auto -10% -35% auto;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(104, 31, 61, 0.18), rgba(104, 31, 61, 0));
+        pointer-events: none;
+    }
+
+    .candidate-quiz-intro-copy {
+        position: relative;
+        z-index: 1;
+        max-width: 640px;
+        display: grid;
+        gap: 1rem;
+    }
+
+    .candidate-quiz-intro-copy h3 {
+        margin: 0;
+        color: #4d1830;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        line-height: 1.12;
+    }
+
+    .candidate-quiz-intro-copy p:last-of-type {
+        margin: 0;
+        color: #675a71;
+        max-width: 48ch;
+        font-size: 0.98rem;
+        line-height: 1.6;
+    }
+
+    .candidate-quiz-start {
+        justify-self: start;
+        min-width: 180px;
+        box-shadow: 0 14px 30px rgba(104, 31, 61, 0.18);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .candidate-quiz-start:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 36px rgba(104, 31, 61, 0.22);
+    }
+
+    .candidate-quiz-form {
+        display: grid;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .candidate-quiz-slider-head {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .candidate-quiz-progress {
+        text-align: center;
+    }
+
+    .candidate-quiz-progress strong {
+        color: #4d1830;
+        font-size: 1.2rem;
+    }
+
+    .candidate-quiz-arrow {
+        width: 52px;
+        height: 52px;
+        border: 1px solid rgba(214, 219, 196, 0.95);
+        border-radius: 50%;
+        background: linear-gradient(90deg, rgba(246, 248, 240, 0.96), rgba(239, 244, 232, 0.9));
+        color: #4d1830;
+        font-size: 2rem;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .candidate-quiz-arrow:hover {
+        transform: translateY(-1px);
+        border-color: rgba(104, 31, 61, 0.25);
+    }
+
+    .candidate-quiz-arrow:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .candidate-quiz-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .candidate-quiz-card,
+    .candidate-quiz-summary-card,
+    .candidate-quiz-radar-card {
+        border: 1px solid rgba(214, 219, 196, 0.95);
+        border-radius: 28px;
+        background: linear-gradient(90deg, rgba(246, 248, 240, 0.96), rgba(239, 244, 232, 0.9));
+        padding: 1.25rem 1.35rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+
+    .candidate-quiz-card.is-hidden {
+        display: none;
+    }
+
+    .candidate-quiz-card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .candidate-quiz-card-index {
+        flex-shrink: 0;
+        color: #675a71;
+        font-size: 1.05rem;
+        font-weight: 500;
+    }
+
+    .candidate-quiz-card h3,
+    .candidate-quiz-radar-card h3 {
+        margin: 0.25rem 0 0;
+        color: #4d1830;
+        font-size: 1.08rem;
+        line-height: 1.45;
+    }
+
+    .candidate-quiz-options {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .candidate-quiz-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.7rem;
+        padding: 1rem 1.05rem;
+        border-radius: 22px;
+        border: 1px solid rgba(214, 219, 196, 0.95);
+        background: linear-gradient(90deg, rgba(246, 248, 240, 0.96), rgba(239, 244, 232, 0.82));
+        color: #675a71;
+        transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+    }
+
+    .candidate-quiz-option:hover {
+        transform: translateY(-1px);
+        border-color: rgba(104, 31, 61, 0.16);
+    }
+
+    .candidate-quiz-option input {
+        margin-top: 0.15rem;
+        accent-color: #681f3d;
+    }
+
+    .candidate-quiz-option.is-correct {
+        border-color: rgba(102, 142, 108, 0.45);
+        background: rgba(225, 241, 227, 0.95);
+    }
+
+    .candidate-quiz-option.is-incorrect {
+        border-color: rgba(168, 108, 108, 0.35);
+        background: rgba(249, 232, 232, 0.95);
+    }
+
+    .candidate-quiz-feedback {
+        margin-top: 1rem;
+        border-radius: 20px;
+        padding: 0.95rem 1rem;
+        background: rgba(255, 255, 255, 0.76);
+        color: #675a71;
+    }
+
+    .candidate-quiz-feedback.is-success {
+        border: 1px solid rgba(102, 142, 108, 0.3);
+    }
+
+    .candidate-quiz-feedback.is-warning {
+        border: 1px solid rgba(168, 108, 108, 0.25);
+    }
+
+    .candidate-quiz-feedback strong {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: #4d1830;
+    }
+
+    .candidate-quiz-feedback p,
+    .candidate-quiz-radar-card p {
+        margin: 0;
+    }
+
+    .candidate-quiz-actions {
+        justify-content: flex-end;
+    }
+
+    .candidate-quiz-results {
+        display: grid;
+        gap: 1.25rem;
+        grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.85fr);
+        margin-top: 1.5rem;
+    }
+
+    .candidate-quiz-network-card,
+    .candidate-quiz-summary-card {
+        border: 1px solid rgba(255, 255, 255, 0.42);
+        border-radius: 30px;
+        background:
+            linear-gradient(150deg, rgba(104, 31, 61, 0.07), rgba(255, 255, 255, 0.7) 36%, rgba(239, 244, 232, 0.86) 100%),
+            rgba(255, 255, 255, 0.45);
+        box-shadow: 0 18px 44px rgba(104, 31, 61, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.58);
+        backdrop-filter: blur(10px);
+    }
+
+    .candidate-quiz-network-card {
+        display: grid;
+        gap: 1rem;
+        padding: 1.35rem;
+    }
+
+    .candidate-quiz-network-copy h3,
+    .candidate-quiz-summary-card h3 {
+        margin: 0.2rem 0 0;
+        color: #4d1830;
+        font-size: 1.15rem;
+        line-height: 1.35;
+    }
+
+    .candidate-quiz-network-copy p:last-child,
+    .candidate-quiz-summary-card > p:last-of-type,
+    .candidate-quiz-summary-card h3 + p {
+        margin: 0;
+        color: #675a71;
+    }
+
+    .candidate-quiz-network-stage {
+        min-height: 420px;
+        border-radius: 28px;
+        border: 1px solid rgba(214, 219, 196, 0.8);
+        background: radial-gradient(circle at top, rgba(255, 255, 255, 0.92), rgba(240, 245, 234, 0.82));
+        overflow: hidden;
+        position: relative;
+    }
+
+    .candidate-skill-network {
+        width: 100%;
+        height: 420px;
+        display: block;
+        cursor: grab;
+    }
+
+    .candidate-skill-network.is-dragging {
+        cursor: grabbing;
+    }
+
+    .candidate-skill-network .node-label-outline {
+        fill: none;
+        stroke: rgba(77, 24, 48, 0.34);
+        stroke-width: 4px;
+        stroke-linejoin: round;
+        paint-order: stroke;
+    }
+
+    .candidate-skill-network .node-label-text {
+        fill: #ffffff;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    .candidate-skill-network .node-level-text {
+        fill: rgba(255, 255, 255, 0.96);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .candidate-network-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.85rem 1.2rem;
+        color: #675a71;
+        font-size: 0.92rem;
+    }
+
+    .candidate-network-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .candidate-network-legend i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .candidate-network-legend .is-strong {
+        background: #681f3d;
+    }
+
+    .candidate-network-legend .is-average {
+        background: #a35f78;
+    }
+
+    .candidate-network-legend .is-weak {
+        background: #d59aad;
+    }
+
+    .candidate-quiz-summary-card {
+        display: grid;
+        gap: 1rem;
+        align-content: start;
+        padding: 1.35rem;
+    }
+
+    .candidate-quiz-summary-actions {
+        justify-content: flex-start;
+        margin-top: 0.25rem;
+    }
+
+    .candidate-quiz-summary-grid {
+        display: grid;
+        gap: 0.9rem;
+    }
+
+    .candidate-quiz-summary-item {
+        padding: 0.9rem 1rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.68);
+        border: 1px solid rgba(214, 219, 196, 0.72);
+        display: grid;
+        gap: 0.25rem;
+    }
+
+    .candidate-quiz-summary-item span {
+        color: #675a71;
+        font-size: 0.92rem;
+    }
+
+    .candidate-quiz-summary-item strong {
+        color: #4d1830;
+        font-size: 1.02rem;
+        line-height: 1.35;
+    }
+
+    @media (max-width: 900px) {
+        .candidate-quiz-results {
+            grid-template-columns: 1fr;
+        }
+
+        .candidate-quiz-card-head {
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .candidate-quiz-slider-head {
+            grid-template-columns: 1fr;
+        }
+
+        .candidate-quiz-intro {
+            padding: 1.5rem;
+        }
+
+        .candidate-quiz-network-stage,
+        .candidate-skill-network {
+            min-height: 360px;
+            height: 360px;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        const intro = document.querySelector('[data-quiz-intro]');
+        const startButton = document.querySelector('[data-quiz-start]');
+        const quizForm = document.querySelector('[data-quiz-form]');
+        const slides = Array.from(document.querySelectorAll('[data-quiz-slide]'));
+        const prevButton = document.querySelector('[data-quiz-prev]');
+        const nextButton = document.querySelector('[data-quiz-next]');
+        const currentLabel = document.querySelector('[data-quiz-current]');
+        const graphDataScript = document.getElementById('candidate-skill-network-data');
+        const networkSvg = document.querySelector('.candidate-skill-network');
+
+        if (!slides.length || !prevButton || !nextButton || !currentLabel || !quizForm) {
+            return;
+        }
+
+        let currentIndex = slides.findIndex((slide) => !slide.classList.contains('is-hidden'));
+        if (currentIndex < 0) {
+            currentIndex = 0;
+        }
+
+        if (startButton && intro) {
+            startButton.addEventListener('click', function () {
+                intro.classList.add('is-hidden');
+                quizForm.classList.remove('is-hidden');
+                renderSlide(currentIndex);
+            });
+        }
+
+        function renderSlide(index) {
+            slides.forEach((slide, slideIndex) => {
+                slide.classList.toggle('is-hidden', slideIndex !== index);
+            });
+            currentLabel.textContent = String(index + 1);
+            prevButton.disabled = index === 0;
+            nextButton.disabled = index === slides.length - 1;
+        }
+
+        prevButton.addEventListener('click', function () {
+            if (currentIndex > 0) {
+                currentIndex -= 1;
+                renderSlide(currentIndex);
+            }
+        });
+
+        nextButton.addEventListener('click', function () {
+            if (currentIndex < slides.length - 1) {
+                currentIndex += 1;
+                renderSlide(currentIndex);
+            }
+        });
+
+        if (!quizForm.classList.contains('is-hidden')) {
+            renderSlide(currentIndex);
+        }
+
+        if (graphDataScript && networkSvg) {
+            const graphData = JSON.parse(graphDataScript.textContent);
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const width = 680;
+            const height = 420;
+            const nodeColors = {
+                Strong: '#681f3d',
+                Average: '#a35f78',
+                Weak: '#d59aad',
+            };
+            const strokeColors = {
+                Strong: 'rgba(104, 31, 61, 0.22)',
+                Average: 'rgba(163, 95, 120, 0.22)',
+                Weak: 'rgba(213, 154, 173, 0.22)',
+            };
+
+            const nodes = graphData.nodes.map(function (node, index) {
+                return Object.assign({}, node, {
+                    x: 140 + (index % 4) * 135,
+                    y: 100 + Math.floor(index / 4) * 135,
+                    vx: 0,
+                    vy: 0,
+                });
+            });
+
+            const nodeMap = Object.fromEntries(nodes.map(function (node) {
+                return [node.id, node];
+            }));
+
+            const edges = graphData.edges.map(function (edge) {
+                return {
+                    source: nodeMap[edge.source],
+                    target: nodeMap[edge.target],
+                };
+            });
+
+            const linkLayer = document.createElementNS(svgNS, 'g');
+            const nodeLayer = document.createElementNS(svgNS, 'g');
+            networkSvg.appendChild(linkLayer);
+            networkSvg.appendChild(nodeLayer);
+
+            const linkEls = edges.map(function () {
+                const line = document.createElementNS(svgNS, 'line');
+                line.setAttribute('stroke', 'rgba(103, 90, 113, 0.26)');
+                line.setAttribute('stroke-width', '2');
+                linkLayer.appendChild(line);
+                return line;
+            });
+
+            nodes.forEach(function (node) {
+                const group = document.createElementNS(svgNS, 'g');
+                group.style.cursor = 'grab';
+
+                const shadow = document.createElementNS(svgNS, 'circle');
+                shadow.setAttribute('r', node.radius + 4);
+                shadow.setAttribute('fill', strokeColors[node.level]);
+
+                const circle = document.createElementNS(svgNS, 'circle');
+                circle.setAttribute('r', node.radius);
+                circle.setAttribute('fill', nodeColors[node.level]);
+                circle.setAttribute('stroke', 'rgba(255,255,255,0.8)');
+                circle.setAttribute('stroke-width', '2');
+
+                const labelOutline = document.createElementNS(svgNS, 'text');
+                labelOutline.setAttribute('class', 'node-label-outline');
+                labelOutline.setAttribute('text-anchor', 'middle');
+                labelOutline.setAttribute('dominant-baseline', 'middle');
+
+                const label = document.createElementNS(svgNS, 'text');
+                label.setAttribute('class', 'node-label-text');
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('dominant-baseline', 'middle');
+
+                const level = document.createElementNS(svgNS, 'text');
+                level.setAttribute('class', 'node-level-text');
+                level.setAttribute('text-anchor', 'middle');
+                level.textContent = node.level;
+
+                group.appendChild(shadow);
+                group.appendChild(circle);
+                group.appendChild(labelOutline);
+                group.appendChild(label);
+                group.appendChild(level);
+                nodeLayer.appendChild(group);
+                node.el = group;
+                node.labelOutlineEl = labelOutline;
+                node.labelEl = label;
+                node.levelEl = level;
+
+                function dragStart(event) {
+                    event.preventDefault();
+                    node.dragging = true;
+                    networkSvg.classList.add('is-dragging');
+                    group.style.cursor = 'grabbing';
+                }
+
+                function dragMove(event) {
+                    if (!node.dragging) {
+                        return;
+                    }
+                    const rect = networkSvg.getBoundingClientRect();
+                    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+                    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+                    node.x = ((clientX - rect.left) / rect.width) * width;
+                    node.y = ((clientY - rect.top) / rect.height) * height;
+                    node.vx = 0;
+                    node.vy = 0;
+                }
+
+                function dragEnd() {
+                    node.dragging = false;
+                    networkSvg.classList.remove('is-dragging');
+                    group.style.cursor = 'grab';
+                }
+
+                group.addEventListener('mousedown', dragStart);
+                group.addEventListener('touchstart', dragStart, { passive: false });
+                window.addEventListener('mousemove', dragMove);
+                window.addEventListener('touchmove', dragMove, { passive: false });
+                window.addEventListener('mouseup', dragEnd);
+                window.addEventListener('touchend', dragEnd);
+            });
+
+            function buildLabelLines(text) {
+                const words = text.split(' ');
+                if (words.length <= 1) {
+                    return [text];
+                }
+                if (words.length === 2) {
+                    return words;
+                }
+
+                const lines = [];
+                let current = words[0];
+                for (let i = 1; i < words.length; i += 1) {
+                    const next = words[i];
+                    if ((current + ' ' + next).length <= 13 || lines.length === 0) {
+                        current += ' ' + next;
+                    } else {
+                        lines.push(current);
+                        current = next;
+                    }
+                }
+                lines.push(current);
+                return lines.slice(0, 3);
+            }
+
+            function renderLabel(textEl, lines, fontSize, startY) {
+                while (textEl.firstChild) {
+                    textEl.removeChild(textEl.firstChild);
+                }
+                textEl.setAttribute('font-size', String(fontSize));
+                lines.forEach(function (line, index) {
+                    const tspan = document.createElementNS(svgNS, 'tspan');
+                    tspan.setAttribute('x', '0');
+                    tspan.setAttribute('y', String(startY + index * (fontSize + 2)));
+                    tspan.textContent = line;
+                    textEl.appendChild(tspan);
+                });
+            }
+
+            function tick() {
+                nodes.forEach(function (node) {
+                    if (!node.dragging) {
+                        node.vx += (width / 2 - node.x) * 0.0008;
+                        node.vy += (height / 2 - node.y) * 0.0008;
+                    }
+                });
+
+                edges.forEach(function (edge) {
+                    const dx = edge.target.x - edge.source.x;
+                    const dy = edge.target.y - edge.source.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const targetDistance = 135;
+                    const spring = (distance - targetDistance) * 0.0035;
+                    const fx = (dx / distance) * spring;
+                    const fy = (dy / distance) * spring;
+
+                    if (!edge.source.dragging) {
+                        edge.source.vx += fx;
+                        edge.source.vy += fy;
+                    }
+                    if (!edge.target.dragging) {
+                        edge.target.vx -= fx;
+                        edge.target.vy -= fy;
+                    }
+                });
+
+                for (let i = 0; i < nodes.length; i += 1) {
+                    for (let j = i + 1; j < nodes.length; j += 1) {
+                        const a = nodes[i];
+                        const b = nodes[j];
+                        const dx = b.x - a.x;
+                        const dy = b.y - a.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                        const minDistance = a.radius + b.radius + 18;
+                        if (distance < minDistance) {
+                            const push = (minDistance - distance) * 0.007;
+                            const fx = (dx / distance) * push;
+                            const fy = (dy / distance) * push;
+                            if (!a.dragging) {
+                                a.vx -= fx;
+                                a.vy -= fy;
+                            }
+                            if (!b.dragging) {
+                                b.vx += fx;
+                                b.vy += fy;
+                            }
+                        }
+                    }
+                }
+
+                nodes.forEach(function (node) {
+                    if (!node.dragging) {
+                        node.x += node.vx;
+                        node.y += node.vy;
+                        node.vx *= 0.92;
+                        node.vy *= 0.92;
+                    }
+
+                    node.x = Math.max(node.radius + 12, Math.min(width - node.radius - 12, node.x));
+                    node.y = Math.max(node.radius + 12, Math.min(height - node.radius - 12, node.y));
+                    node.el.setAttribute('transform', 'translate(' + node.x + ' ' + node.y + ')');
+                    const lines = buildLabelLines(node.label);
+                    const fontSize = node.radius >= 34 ? 11 : node.radius >= 27 ? 10 : 8;
+                    const lineGap = 2;
+                    const labelHeight = lines.length * fontSize + (lines.length - 1) * lineGap;
+                    const startY = lines.length === 1 ? -7 : (-labelHeight / 2) - 4;
+                    renderLabel(node.labelOutlineEl, lines, fontSize, startY);
+                    renderLabel(node.labelEl, lines, fontSize, startY);
+                    node.levelEl.setAttribute('font-size', node.radius >= 34 ? '9' : '8');
+                    node.levelEl.setAttribute('y', String(startY + labelHeight + 9));
+                });
+
+                edges.forEach(function (edge, index) {
+                    linkEls[index].setAttribute('x1', edge.source.x);
+                    linkEls[index].setAttribute('y1', edge.source.y);
+                    linkEls[index].setAttribute('x2', edge.target.x);
+                    linkEls[index].setAttribute('y2', edge.target.y);
+                });
+
+                window.requestAnimationFrame(tick);
+            }
+
+            tick();
+        }
+    }());
+</script>
 {% endblock %}

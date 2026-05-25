@@ -273,6 +273,13 @@
 
         <div class="candidate-layout">
             <aside class="candidate-sidebar">
+                <!-- Mobile Navigation Links (Visible only on Mobile/Tablet) -->
+                <nav class="candidate-sidebar-nav-mobile" aria-label="Mobile navigation">
+                    {% for item in company_nav_items %}
+                    <a href="{{ item.url }}" class="candidate-side-link{% if active_section == item.key %} is-active{% endif %}">{{ item.label }}</a>
+                    {% endfor %}
+                </nav>
+
                 <div class="candidate-side-note">
                     <p class="candidate-card-kicker">Company summary</p>
                     <h3>{{ company_stats.posted_jobs }} job{{ company_stats.posted_jobs|pluralize }} posted</h3>

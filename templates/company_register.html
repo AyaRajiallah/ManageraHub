@@ -237,12 +237,15 @@
     <div class="reg-right">
         <div class="reg-right-header">
             <p class="reg-step-label">Company Registration</p>
-            <h2>Register your company</h2>
-            <p>Fields marked <strong style="color:var(--plum)">*</strong> are required.</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h2 style="margin:0;">Register your company</h2>
+                <button type="button" onclick="autofillDemoCompany()" class="file-btn" style="background:#5a5d4a; border-color:#8c907d; color:#fff; cursor:pointer; padding:6px 14px; font-size:0.72rem; transition: background 0.15s; height: 32px; border-radius: 999px;">✨ Demo Autofill</button>
+            </div>
+            <p style="margin-top: 8px;">Fields marked <strong style="color:var(--plum)">*</strong> are required.</p>
         </div>
 
-        {% if error_message %}<div class="reg-message reg-message-error">{{ error_message }}</div>{% endif %}
-        {% if success_message %}<div class="reg-message reg-message-success">{{ success_message }}</div>{% endif %}
+        {% if error_message %}<div class="reg-message reg-message-error" style="background: rgba(200,50,50,0.15); border-color: rgba(200,50,50,0.3); color: #f2c4c4;">{{ error_message }}</div>{% endif %}
+        {% if success_message %}<div class="reg-message reg-message-success" style="background: rgba(50,150,80,0.15); border-color: rgba(50,150,80,0.3); color: #c8e6c9;">{{ success_message }}</div>{% endif %}
 
         <form method="post" action="{% url 'company_register' %}" enctype="multipart/form-data" class="reg-form">
             {% csrf_token %}
@@ -252,6 +255,17 @@
             <div class="reg-field">
                 <label for="company_name">Company Name <span class="req">*</span></label>
                 <input type="text" id="company_name" name="company_name" placeholder="e.g. Acme Corporation" required>
+            </div>
+
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label for="ice">ICE (15 digits) <span class="req">*</span></label>
+                    <input type="text" id="ice" name="ice" placeholder="e.g. 001524367000085" required maxlength="15" minlength="15" pattern="\d{15}" title="Exactly 15 digits required">
+                </div>
+                <div class="reg-field">
+                    <label for="rc_number">RC Number <span class="req">*</span></label>
+                    <input type="text" id="rc_number" name="rc_number" placeholder="e.g. RC Rabat N° 12345" required>
+                </div>
             </div>
 
             <div class="reg-row">
@@ -306,16 +320,16 @@
                 <textarea id="description" name="description" placeholder="Tell candidates about your culture, mission, and what makes you a great employer..."></textarea>
             </div>
 
-            {% comment %} <div class="reg-field">
-                <label>Company Logo <span class="opt">(optional)</span></label>
+            <div class="reg-field">
+                <label>Modèle J / ICE Certificate <span class="req">*</span></label>
                 <div class="file-upload-wrap">
                     <div class="file-upload-label">
-                        <span class="file-text" id="logo-label">PNG, JPG or SVG — max 2 MB</span>
+                        <span class="file-text" id="legal-doc-label">Upload Modèle J (PDF or Image) — max 5 MB</span>
                         <span class="file-btn">Browse</span>
-                        <input type="file" name="logo" accept=".png,.jpg,.jpeg,.svg" id="logo-input">
+                        <input type="file" name="legal_document" accept=".pdf,.png,.jpg,.jpeg" id="legal-doc-input" required>
                     </div>
                 </div>
-            </div> {% endcomment %}
+            </div>
 
             <div class="reg-divider"><span>Administrator Account</span></div>
 
@@ -376,7 +390,7 @@
             </div>
 
             <button type="submit" class="reg-submit">Create Company Account</button>
-            <p class="signin-link">Already registered? <a href="{% url 'signin' %}">Sign in</a></p>
+            <p class="signin-link" style="margin-top: 14px;">Already registered? <a href="{% url 'signin' %}">Sign in</a></p>
         </form>
     </div>
 
@@ -386,9 +400,11 @@
         pwdC.addEventListener('input', () => {
             pwdC.setCustomValidity(pwd.value !== pwdC.value ? 'Passwords do not match.' : '');
         });
-        document.getElementById('logo-input').addEventListener('change', function () {
-            document.getElementById('logo-label').textContent = this.files[0] ? this.files[0].name : 'PNG, JPG or SVG — max 2 MB';
+        
+        document.getElementById('legal-doc-input').addEventListener('change', function () {
+            document.getElementById('legal-doc-label').textContent = this.files[0] ? this.files[0].name : 'Upload Modèle J (PDF or Image) — max 5 MB';
         });
+
         function toggleOtherIndustry(select) {
             const otherField = document.getElementById('industry_other');
             if (select.value === 'Other') {
@@ -399,6 +415,65 @@
                 otherField.required = false;
                 otherField.value = '';
             }
+        }
+
+        function autofillDemoCompany() {
+            document.getElementById('company_name').value = "Maroc Telecom (IAM)";
+            document.getElementById('industry').value = "Technology & IT";
+            
+            // Toggle other if needed, but select standard industry
+            const otherField = document.getElementById('industry_other');
+            if (otherField) {
+                otherField.style.display = 'none';
+                otherField.required = false;
+            }
+
+            document.getElementById('company_size').value = "500+ employees";
+            document.getElementById('country').value = "Morocco";
+            document.getElementById('city').value = "Rabat";
+            document.getElementById('website').value = "https://www.iam.ma";
+            document.getElementById('description').value = "Maroc Telecom is the primary telecommunications company in Morocco. Proudly serving millions of users with innovative network and data solutions across the nation.";
+            
+            // Legal Autofills
+            document.getElementById('ice').value = "001522585000066";
+            document.getElementById('rc_number').value = "RC Rabat N° 12345";
+            
+            // Admin Info
+            document.getElementById('admin_first').value = "Maroc";
+            document.getElementById('admin_last').value = "Telecom";
+            document.getElementById('email').value = "recrutement@iam.ma";
+            document.getElementById('phone').value = "+212 537 71 90 00";
+            
+            // Security
+            document.getElementById('password').value = "IAM12345678";
+            document.getElementById('password_confirm').value = "IAM12345678";
+            
+            // Checkboxes
+            document.getElementById('terms').checked = true;
+            document.getElementById('verified').checked = true;
+            document.getElementById('marketing').checked = true;
+
+            // Fetch the real PDF from the static folder if it exists, with simulated PDF fallback
+            fetch("{% static 'files/Maroc_Telecom_Attestation_ICE.pdf' %}")
+                .then(response => {
+                    if (!response.ok) throw new Error('File not found');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const file = new File([blob], "Maroc_Telecom_Attestation_ICE.pdf", { type: "application/pdf" });
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    document.getElementById('legal-doc-input').files = dt.files;
+                    document.getElementById('legal-doc-label').textContent = "Maroc_Telecom_Attestation_ICE.pdf (Attached)";
+                })
+                .catch(() => {
+                    // Fallback to simulated PDF if real file isn't uploaded to static folder yet
+                    const dt = new DataTransfer();
+                    const file = new File(["%PDF-1.4 simulated content"], "Maroc_Telecom_Attestation_ICE.pdf", { type: "application/pdf" });
+                    dt.items.add(file);
+                    document.getElementById('legal-doc-input').files = dt.files;
+                    document.getElementById('legal-doc-label').textContent = "Maroc_Telecom_Attestation_ICE.pdf (Simulated File)";
+                });
         }
     </script>
 </body>

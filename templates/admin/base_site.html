@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700&family=Great+Vibes:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'admin/css/admin-theme.css' %}?v=20260518-navbar-logout">
+<link rel="stylesheet" href="{% static 'admin/css/admin-theme.css' %}?v=20260523-fluid-shell-v5">
 {% endblock %}
 
 {% block branding %}
@@ -26,6 +26,74 @@
         <a href="{% url 'admin_logout_redirect' %}" class="mh-admin-nav-logout-link">Log out</a>
     </nav>
 </div>
+
+<script>
+    // Universal Responsive Collapsible Sidebar Drawer for Admin Dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('nav-sidebar');
+        const header = document.querySelector('.mh-brand-shell');
+        
+        if (sidebar && header) {
+            // Create hamburger toggle button
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'admin-sidebar-toggle-hamburger';
+            toggleBtn.setAttribute('aria-label', 'Toggle admin sidebar navigation');
+            toggleBtn.innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            `;
+            
+            // Insert toggle button at the start of header brand shell
+            header.insertBefore(toggleBtn, header.firstChild);
+            
+            // Create background overlay
+            let overlay = document.querySelector('.admin-sidebar-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'admin-sidebar-overlay';
+                document.body.appendChild(overlay);
+            }
+            
+            // Create mobile navigation for sidebar drawer
+            let mobileNav = sidebar.querySelector('.admin-sidebar-nav-mobile');
+            if (!mobileNav) {
+                mobileNav = document.createElement('nav');
+                mobileNav.className = 'admin-sidebar-nav-mobile';
+                mobileNav.innerHTML = `
+                    <a href="{% url 'admin:index' %}" class="admin-side-link">Dashboard</a>
+                    <a href="/admin/auth/user/" class="admin-side-link">Users</a>
+                    <a href="/admin/auth/group/" class="admin-side-link">Roles</a>
+                    <a href="/admin/admin/logentry/" class="admin-side-link">Activity</a>
+                    <form id="mh-sidebar-logout-form" method="post" action="{% url 'admin_logout_redirect' %}" style="display: none;">
+                        {% csrf_token %}
+                    </form>
+                    <a href="#" class="admin-side-link" onclick="document.getElementById('mh-sidebar-logout-form').submit(); return false;">Log out</a>
+                `;
+                sidebar.insertBefore(mobileNav, sidebar.firstChild);
+            }
+            
+            // Toggle sidebar click listeners
+            toggleBtn.addEventListener('click', function() {
+                document.body.classList.toggle('admin-sidebar-open');
+            });
+            
+            overlay.addEventListener('click', function() {
+                document.body.classList.remove('admin-sidebar-open');
+            });
+            
+            // Close sidebar when any link inside it is clicked
+            sidebar.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    document.body.classList.remove('admin-sidebar-open');
+                });
+            });
+        }
+    });
+</script>
 {% endblock %}
 
 {% block usertools %}
@@ -44,7 +112,7 @@
                 </form>
             </div>
         </details>
-        <a href="/">View site</a>
+        <a href="/">View Site</a>
     </div>
 </div>
 {% endif %}

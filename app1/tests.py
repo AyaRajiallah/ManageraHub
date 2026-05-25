@@ -95,6 +95,85 @@ class SigninRoutesTests(TestCase):
         self.assertContains(response, "Candidate Dashboard")
         self.assertContains(response, "Home")
         self.assertContains(response, "Search jobs, companies, or keywords")
+        self.assertContains(response, "Candidate Skills Quiz")
+        self.assertContains(response, "Train smarter.")
+        self.assertContains(response, "Boost your interview skills.")
+        self.assertContains(response, "Start QCM")
+        self.assertContains(response, 'class="candidate-quiz-form is-hidden"')
+        self.assertContains(response, "Application Tracker")
+
+    def test_candidate_sidebar_shows_application_tracker_timeline(self):
+        user = User.objects.create_user(
+            username="tracker@example.com",
+            email="tracker@example.com",
+            password="secret123",
+        )
+        CandidateProfile.objects.create(user=user, city="Rabat", country="Morocco")
+        job = JobOffer.objects.create(
+            title="Product Analyst",
+            company_name="Atlas Studio",
+            city="Rabat",
+            country="Morocco",
+            job_type="design",
+            contract_type="full_time",
+            experience_level="mid",
+            summary="Shape product insights.",
+            responsibilities="Review product data",
+            requirements="Figma",
+        )
+        JobApplication.objects.create(
+            candidate=user,
+            job_offer=job,
+            full_name="Aya Tracker",
+            email="tracker@example.com",
+            status="under_review",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get("/candidate/dashboard/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Application Tracker")
+        self.assertContains(response, "Product Analyst")
+        self.assertContains(response, "Application Sent")
+        self.assertContains(response, "Under Review")
+
+    def test_candidate_dashboard_quiz_shows_skill_network_and_summary(self):
+        user = User.objects.create_user(
+            username="quiz@example.com",
+            email="quiz@example.com",
+            password="secret123",
+        )
+        CandidateProfile.objects.create(user=user, city="Rabat", country="Morocco")
+        self.client.force_login(user)
+
+        response = self.client.post(
+            "/candidate/dashboard/",
+            {
+                "candidate_quiz_submit": "1",
+                "communication_1": "1",
+                "communication_2": "2",
+                "logique_1": "2",
+                "logique_2": "2",
+                "stress_1": "1",
+                "stress_2": "2",
+                "entretien_1": "0",
+                "entretien_2": "1",
+                "organisation_1": "1",
+                "organisation_2": "0",
+                "confiance_1": "0",
+                "confiance_2": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Skill Network")
+        self.assertContains(response, "Graph Summary")
+        self.assertContains(response, "Total score")
+        self.assertContains(response, "100%")
+        self.assertContains(response, "Communication")
+        self.assertContains(response, "Stress Management")
+        self.assertContains(response, "Submit Quiz")
 
     def test_job_offers_page_shows_all_active_jobs_by_default(self):
         user = User.objects.create_user(

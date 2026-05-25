@@ -1,4 +1,4 @@
-﻿"""
+"""
 Django settings for monprojet project.
 """
 
@@ -77,6 +77,8 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 
 if HAS_ALLAUTH:
+    ACCOUNT_ADAPTER = 'app1.adapters.NoMessagesAccountAdapter'
+    SOCIALACCOUNT_ADAPTER = 'app1.adapters.NoMessagesSocialAccountAdapter'
     SOCIALACCOUNT_PROVIDERS = {}
     if GOOGLE_AUTH_CONFIGURED:
         SOCIALACCOUNT_PROVIDERS['google'] = {
@@ -169,4 +171,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Console Email Backend for Local PFA presentation (simulates emailing offline)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@managerahub.ma'
+
+# Allow embedding media/pages in iframes from the same origin (needed for offline PDF previews)
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+
 

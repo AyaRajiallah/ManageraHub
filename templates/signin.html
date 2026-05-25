@@ -72,9 +72,27 @@
         .modal-submit, .modal-back { width: 100%; min-height: 50px; border-radius: var(--radius-pill); border: none; background: var(--plum); color: #fff; font-family: "Montserrat", sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
         .modal-back { margin-top: 12px; background: transparent; color: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.16); }
         @media (max-width: 900px) { body { grid-template-columns: 1fr; } .panel-left { position: relative; height: 260px; } .brand { top: 18px; left: 22px; } .panel-left-content { padding: 22px; } .panel-right { padding: 36px 24px 48px; align-items: flex-start; } }
+        
+        /* Company theme dynamic overrides */
+        body.company-theme {
+            --plum: #5a5d4a;
+            --plum-deep: #4a4d3c;
+            --periwinkle: #a8d5a2;
+            background: url("{% static 'images/service-company.jpeg' %}") center center / cover no-repeat fixed !important;
+        }
+        body.company-theme .panel-left-bg {
+            background: url("{% static 'images/about-company.jpg' %}") center center / cover no-repeat !important;
+        }
+        body.company-theme .panel-left-overlay {
+            background: linear-gradient(160deg, rgba(90, 93, 74, 0.48) 0%, rgba(26, 30, 24, 0.68) 55%, rgba(14, 16, 13, 0.88) 100%) !important;
+        }
+        body.company-theme .btn-submit {
+            background: var(--plum) !important;
+            box-shadow: 0 12px 28px rgba(90, 93, 74, 0.45) !important;
+        }
     </style>
 </head>
-<body>
+<body class="{% if active_role == 'company' %}company-theme{% endif %}">
     <div class="panel-left">
         <div class="panel-left-bg"></div>
         <div class="panel-left-overlay"></div>
@@ -188,12 +206,24 @@
         const candidateSocial = document.getElementById("candidate-social");
         const socialAuthEnabled = {{ social_auth_enabled|yesno:"true,false" }};
 
+        function syncCompanyTheme() {
+            if (!candidateRadio || !companyRadio) {
+                return;
+            }
+            if (companyRadio.checked) {
+                document.body.classList.add("company-theme");
+            } else {
+                document.body.classList.remove("company-theme");
+            }
+        }
+
         function syncSocialButtons() {
             if (!candidateRadio || !companyRadio) {
                 return;
             }
             const showSocial = socialAuthEnabled && candidateRadio.checked;
             candidateSocial.classList.toggle("hidden", !showSocial);
+            syncCompanyTheme();
         }
 
         forgotLink.addEventListener("click", function (e) { e.preventDefault(); forgotModal.classList.add("open"); });

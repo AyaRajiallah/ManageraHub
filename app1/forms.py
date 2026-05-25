@@ -269,6 +269,9 @@ class CompanyProfileForm(forms.ModelForm):
             "description",
             "logo",
             "background_image",
+            "ice",
+            "rc_number",
+            "legal_document",
         ]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 5}),
@@ -277,12 +280,24 @@ class CompanyProfileForm(forms.ModelForm):
             "company_name": "Company name",
             "phone_number": "Phone number",
             "background_image": "Cover image",
+            "ice": "ICE (15-digit Identifiant Commun de l'Entreprise)",
+            "rc_number": "Registre du Commerce (RC) number",
+            "legal_document": "Modèle J / Attestation d'ICE (PDF or Image)",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["industry"].widget = forms.Select(choices=self.INDUSTRY_CHOICES)
         self.fields["company_size"].widget = forms.Select(choices=self.SIZE_CHOICES)
+
+    def clean_ice(self):
+        ice = self.cleaned_data.get("ice")
+        if ice:
+            ice = ice.strip()
+            if not ice.isdigit() or len(ice) != 15:
+                raise forms.ValidationError("The ICE number must contain exactly 15 digits.")
+        return ice
+
 
 
 class JobOfferForm(forms.ModelForm):
